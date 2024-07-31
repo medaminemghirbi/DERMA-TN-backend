@@ -22,6 +22,4 @@ Things you may want to cover:
 * Deployment instructions
 
 * ...
-# PFE2023-back
-# TuniOffers
-# DERMA-TN
+# PFE2025-back
