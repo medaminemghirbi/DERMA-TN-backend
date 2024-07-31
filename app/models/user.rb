@@ -5,14 +5,7 @@ class User < ApplicationRecord
     enum role: %i[employee stagiaire freelancer admin superadmin]
     validates_presence_of :email
     validates_uniqueness_of :email
-    has_many :formations, dependent: :destroy
-    has_many :certifications, dependent: :destroy
-    has_many :experiences, dependent: :destroy
-    has_many :user_langues, dependent: :destroy
-    has_many :competences, dependent: :destroy
-    has_many :favoris, dependent: :destroy
-    has_many :offres, dependent: :destroy
-    has_many :candidatures, dependent: :destroy
+
     has_one_attached :avatar, dependent: :destroy
     has_one_attached :avatar1, dependent: :destroy
     has_many :sent_messages, class_name: 'Message'
