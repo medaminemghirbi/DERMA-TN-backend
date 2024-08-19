@@ -2,9 +2,8 @@ class User < ApplicationRecord
   include Rails.application.routes.url_helpers
   before_create :confirmation_token
     has_secure_password
-    enum role: %i[employee stagiaire freelancer admin superadmin]
-    validates_presence_of :email
-    validates_uniqueness_of :email
+    # validates_presence_of :email
+    # validates_uniqueness_of :email
 
     has_one_attached :avatar, dependent: :destroy
     has_one_attached :avatar1, dependent: :destroy
