@@ -28,40 +28,27 @@ class Api::V1::Web::ConsultationsController < ApplicationController
     end
   end
 
-  # PATCH/PUT /consultations/1
   def update
     @consultation = Consultation.find(params[:id])
+    @patient = User.find(@consultation.patient_id)
     
-    if ["pending", "rejected"].include?(consultation_params[:status])
-      @consultation.update(consultation_params)
-      DemandeMailer.send_mail_demande(@consultation.user, @consultation).deliver
-      render json: @consultation, include: [:user]
-    elsif consultation_params[:status] == "approved"
-      @user = User.find(@consultation.user_id)
-      if @user
-        DemandeMailer.send_mail_demande(@consultation.user, @consultation).deliver
-        if @user.mobile.present?
-          to_phone_number = "+216#{@user.mobile}"
-          body = "Your consultation has been approved. Please check your phone for details."
-          sms_service = Twilio::SmsService.new(
-            body: body,
-            to_phone_number: to_phone_number
-          )
-          sms_service.call
-        else
-          Rails.logger.warn("User #{@user.id} has no mobile number.")
-        end
-        render json: @demande, include: [:user, :type_conge]
+    if valid_status?(consultation_params[:status])
+      if @consultation.update(consultation_params)
+        handle_notifications(@patient, @consultation)
+        render json: @consultation, include: [:user]
       else
-        render json: { error: 'User not found' }, status: :not_found
+        render json: @consultation.errors, status: :unprocessable_entity
       end
     else
-      render json: @demande.errors, status: :unprocessable_entity
+      render json: { error: 'Invalid status' }, status: :unprocessable_entity
     end
   rescue StandardError => e
-    Rails.logger.error("Failed to update request: #{e.message}")
+    Rails.logger.error("Failed to update consultation: #{e.message}")
     render json: { error: e.message }, status: :internal_server_error
   end
+  
+  
+
   # DELETE /consultations/1
   def destroy
     if(@consultation[:status] =="pending")
@@ -72,13 +59,13 @@ class Api::V1::Web::ConsultationsController < ApplicationController
     end
   end
 
-  #render consultations by Patients
-  def patient_consultations
-    @consultations = Consultation.current.where(user_id: params[:user_id]).includes(:user).all
-    render json: @consultations, include: {
-      user: { only: [:id, :email, :lastname, :firstname] }
-    }
+  #render consultations by Doctors
+  def doctor_consultations
+    @consultations = Consultation.current.where(docotor_id: params[:docotor_id]).all
+    render json: @consultations
   end
+
+
 
 
   private
@@ -89,4 +76,32 @@ class Api::V1::Web::ConsultationsController < ApplicationController
     def consultation_params
       params.permit(:appointment, :status, :refus_reason, :is_archived, :user_id, :id)
     end  
+
+
+    def valid_status?(status)
+      ["pending", "rejected", "approved"].include?(status)
+    end
+    
+    def handle_notifications(patient, consultation)
+      if patient.user_setting.is_emailable
+        DemandeMailer.send_mail_demande(patient, consultation).deliver
+      end
+    
+      if patient.user_setting.is_smsable && patient.mobile.present?
+        to_phone_number = "+216#{patient.mobile}"
+        body = "Your consultation status has been updated."
+        sms_service = Twilio::SmsService.new(
+          body: body,
+          to_phone_number: to_phone_number
+        )
+        sms_service.call
+      end
+    
+      if patient.user_setting.is_notifiable
+        ActionCable.server.broadcast "consultation_#{consultation.id}", {
+          consultation: consultation,
+          status: consultation.status
+        }
+      end
+    end
 end

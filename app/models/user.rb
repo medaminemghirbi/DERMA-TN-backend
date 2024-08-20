@@ -9,7 +9,10 @@ class User < ApplicationRecord
     has_one_attached :avatar1, dependent: :destroy
     has_many :sent_messages, class_name: 'Message'
     has_many :received_messages, class_name: 'Message'
-  
+    has_one :user_setting, dependent: :destroy
+
+    after_create :create_default_user_settings
+
     def email_activate
       self.email_confirmed = true
       self.confirm_token = nil
@@ -41,4 +44,9 @@ class User < ApplicationRecord
       # Get the URL of the associated image
       avatar1.attached? ? url_for(avatar1) : nil
     end
+
+    def create_default_user_settings
+      create_user_setting(is_emailable: true, is_notifiable: true, is_smsable: true)
+    end
+    
 end

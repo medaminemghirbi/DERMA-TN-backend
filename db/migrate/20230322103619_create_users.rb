@@ -11,6 +11,9 @@ class CreateUsers < ActiveRecord::Migration[7.0]
       t.string :password_reset_token
       t.datetime :password_reset_sent_at
       t.bigint :phone_number
+      t.date :birthday
+      t.string :gender
+      t.integer :civil_status
       # Add this column for STI
       t.string :type
       # Add Doctor-specific fields
@@ -20,7 +23,11 @@ class CreateUsers < ActiveRecord::Migration[7.0]
       t.float :longitude
       t.string :google_maps_url
       t.string :description
+      #Add  Patient-specific fields
+
+      t.string :medical_history
       t.timestamps
+
     end
   end
 end

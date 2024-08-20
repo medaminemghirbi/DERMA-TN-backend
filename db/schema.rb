@@ -58,7 +58,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_08_19_141135) do
   end
 
   create_table "maladies", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.string "maladie_name"
+    t.string "maladie_name", null: false
     t.text "maladie_description"
     t.text "synonyms"
     t.text "symptoms"
@@ -81,6 +81,16 @@ ActiveRecord::Schema[7.0].define(version: 2024_08_19_141135) do
     t.uuid "sender_id"
   end
 
+  create_table "user_settings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.boolean "is_emailable", default: true
+    t.boolean "is_notifiable", default: true
+    t.boolean "is_smsable", default: true
+    t.uuid "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_user_settings_on_user_id"
+  end
+
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "email"
     t.string "password_digest"
@@ -92,6 +102,9 @@ ActiveRecord::Schema[7.0].define(version: 2024_08_19_141135) do
     t.string "password_reset_token"
     t.datetime "password_reset_sent_at"
     t.bigint "phone_number"
+    t.date "birthday"
+    t.string "gender"
+    t.integer "civil_status"
     t.string "type"
     t.string "location"
     t.string "specialization"
@@ -99,6 +112,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_08_19_141135) do
     t.float "longitude"
     t.string "google_maps_url"
     t.string "description"
+    t.string "medical_history"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -107,4 +121,5 @@ ActiveRecord::Schema[7.0].define(version: 2024_08_19_141135) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "consultations", "users", column: "docteur_id"
   add_foreign_key "consultations", "users", column: "patient_id"
+  add_foreign_key "user_settings", "users"
 end
