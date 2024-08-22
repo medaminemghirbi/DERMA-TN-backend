@@ -1,4 +1,4 @@
-class Blog < User
+class Admin < User
   ##scopes
   scope :current, -> { where(is_archived: false) }
   ##Includes
