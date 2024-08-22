@@ -1,10 +1,10 @@
-class Api::V1::Web::MessagesController < ApplicationController
+class Api::V1::MessagesController < ApplicationController
   before_action :set_message, only: %i[ show update destroy ]
 
   # GET /messages
   def index
     if params[:candidature_id].present?
-      @messages = Message.where(candidature_id: params[:candidature_id]).includes(:sender)
+      @messages = Message.all.includes(:sender)
       render json: @messages.to_json(include: { sender: { methods: [:user_image_url] } })
     end
   end
@@ -41,6 +41,6 @@ class Api::V1::Web::MessagesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def message_params
-      params.require(:message).permit(:body, :sender_id, :receiver_id, :offre_id, :candidature_id)
+      params.require(:message).permit(:body, :sender_id)
     end
 end

@@ -1,2 +1,13 @@
-class Admin < User
+class Blog < User
+  ##scopes
+  scope :current, -> { where(is_archived: false) }
+  ##Includes
+
+  ## Callbacks
+
+  ## Validations
+
+  ## Associations
+
+  private
 end

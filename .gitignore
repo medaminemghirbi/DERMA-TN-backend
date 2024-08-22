@@ -25,6 +25,10 @@
 !/tmp/pids/
 !/tmp/pids/.keep
 
+
+#Remove all myenv file in python for deep learning
+/myenv/
+
 # Ignore uploaded files in development.
 /storage/*
 !/storage/.keep

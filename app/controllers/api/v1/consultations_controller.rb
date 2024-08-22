@@ -1,4 +1,4 @@
-class Api::V1::Web::ConsultationsController < ApplicationController
+class Api::V1::ConsultationsController < ApplicationController
   before_action :set_consultation, only: [:show, :update, :destroy]
   before_action :authorize_request
   # GET /consultations
@@ -16,7 +16,7 @@ class Api::V1::Web::ConsultationsController < ApplicationController
     @consultation = Consultation.new(consultation_params)  
     # Check if start_date or end_date falls within a holiday
     if Holiday.where(holiday_date: @consultation.appointment).exists?
-      render json: { error: "You cannot add a leave request on a holiday." }, status: :unprocessable_entity
+      render json: { error: "You cannot add a consultation on a holiday." }, status: :unprocessable_entity
       return
     end
   
