@@ -14,7 +14,7 @@ include CurrentUserConcern
                 type: @user.type,
                 token: token,
                 exp: time.strftime("%m-%d-%Y %H:%M")
-            }, methods: [:user_image_url, :user_image_url1]
+            }
         else
             render json: { status: 401 }
         end
