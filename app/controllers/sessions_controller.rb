@@ -3,7 +3,7 @@ include CurrentUserConcern
     def create
         @user = User
             .find_by(email: params['user']['email'])
-            .try(:authenticate, params['user']['password'])
+            &.try(:authenticate, params['user']['password'])
         if @user
             token = JsonWebToken.encode(user_id: @user.id)
             time = Time.now + 24.hours.to_i
@@ -11,7 +11,7 @@ include CurrentUserConcern
             render json: {
                 logged_in: true,
                 user: @user,
-                role: @user.role,
+                type: @user.type,
                 token: token,
                 exp: time.strftime("%m-%d-%Y %H:%M")
             }, methods: [:user_image_url, :user_image_url1]

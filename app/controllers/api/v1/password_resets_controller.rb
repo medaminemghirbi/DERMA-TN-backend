@@ -1,4 +1,4 @@
-class Api::V1::Web::PasswordResetsController < ApplicationController
+class Api::V1::PasswordResetsController < ApplicationController
 
     #************************* CRUD functionlity ****************************#
     def create

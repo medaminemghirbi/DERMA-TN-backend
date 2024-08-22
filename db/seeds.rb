@@ -8,17 +8,22 @@ Admin.create(
   email: "Admin@example.com",
   firstname: "Admin",
   lastname:"Admin",
-  password_digest: "123456",
+  password: "123456",
+  password_confirmation: "123456",
   email_confirmed: true)
+
 Patient.create( 
-email: "patient@example.com",
-firstname: "patient",
-lastname:"patient",
-password_digest: "123456",
-email_confirmed: true)
+  email: "patient@example.com",
+  firstname: "patient",
+  lastname:"patient",
+  password: "123456",
+  password_confirmation: "123456",
+  email_confirmed: true)
+
 Doctor.create(
   email: "doc@example.com",
-  password_digest: "password",
+  password: "123456",
+  password_confirmation: "123456",
   lastname: "Smith",
   firstname: "John",
   address: "123 Clinic Rd",

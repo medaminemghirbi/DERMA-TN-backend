@@ -10,6 +10,7 @@ class CreateMaladies < ActiveRecord::Migration[7.0]
       t.text :prevention
       t.text :diagnosis
       t.text :references
+      t.boolean  :is_archived, :default => false
 
       t.timestamps
     end

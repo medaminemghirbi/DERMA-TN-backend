@@ -1,4 +1,4 @@
-class Api::V1::Web::BlogsController < ApplicationController
+class Api::V1::BlogsController < ApplicationController
   before_action :set_blog, only: [:show, :update, :destroy]
   before_action :authorize_request
 
