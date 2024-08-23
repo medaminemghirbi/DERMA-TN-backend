@@ -2,7 +2,7 @@ class Api::V1::DoctorsController < ApplicationController
   before_action :set_doctor, only: [:show, :destroy]
   before_action :authorize_request
     def  index
-      render json: Doctor.current.all
+      render json: Doctor.current.all, each_serializer: Api::V1::DoctorSerializer
     end
 
   def show

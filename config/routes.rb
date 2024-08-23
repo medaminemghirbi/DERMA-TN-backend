@@ -21,6 +21,7 @@ Rails.application.routes.draw do
         namespace :v1 do
           get 'statistique', to: 'users#count_all_for_admin'
           resources :doctors
+          resources :patients
         end
       end
     # resources :messages
