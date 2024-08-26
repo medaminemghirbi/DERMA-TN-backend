@@ -1,4 +1,7 @@
 class Api::V1::DoctorsController < ApplicationController
+  require 'csv'
+  require 'open-uri'
+
   before_action :set_doctor, only: [:show, :destroy]
   before_action :authorize_request
     def  index
@@ -24,6 +27,9 @@ class Api::V1::DoctorsController < ApplicationController
     render json: @doctors
   end
 
+  def reload_data
+   
+  end
   #************************* les fonctions private de classe ***********************#
 
   private

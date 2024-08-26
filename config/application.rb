@@ -32,5 +32,7 @@ module PFe2023Back
     config.middleware.use ActionDispatch::Cookies
     config.middleware.use config.session_store, config.session_options
     config.autoload_paths << "#{Rails.root}/lib"
+    config.autoload_paths += %W(#{config.root}/app/services)
+
   end
 end
