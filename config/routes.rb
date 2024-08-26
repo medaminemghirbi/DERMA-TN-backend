@@ -22,6 +22,7 @@ Rails.application.routes.draw do
           get 'statistique', to: 'users#count_all_for_admin'
           resources :doctors
           resources :patients
+          get 'reload_data', to: 'scrapers#run'
         end
       end
     # resources :messages
