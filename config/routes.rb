@@ -20,9 +20,12 @@ Rails.application.routes.draw do
       namespace :api do
         namespace :v1 do
           get 'statistique', to: 'users#count_all_for_admin'
-          resources :doctors
+          resources :doctors do
+          post 'activate_compte', on: :member
+        end
           resources :patients
           get 'reload_data', to: 'scrapers#run'
+          get 'last_run', to: 'scrapers#last_run'
         end
       end
     # resources :messages

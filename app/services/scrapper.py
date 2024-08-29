@@ -47,6 +47,10 @@ for gouvernement in gouvernements:
             name_elem = card.find('h2', class_='blue-text h5 font-weight-normal')
             name = name_elem.text.strip() if name_elem else None
 
+            # Check if the name starts with "Dr" and remove it
+            if name and name.startswith('Dr'):
+                name = name.replace('Dr', '').strip()
+
             profile_link_elem = card.find('a', class_='profile_url', href=True)
             profile_link = profile_link_elem['href'] if profile_link_elem else None
 

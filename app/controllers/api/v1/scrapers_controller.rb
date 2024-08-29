@@ -1,13 +1,30 @@
+require 'faker'
+require 'json'
+
 class Api::V1::ScrapersController < ApplicationController
   def run
     csv_file_path = Rails.root.join('app/services/doctors_data.csv')
+    last_run_file = Rails.root.join('app/services/last_scraper_run.json')
 
     # Check if the CSV file exists
     unless File.exist?(csv_file_path)
       RunScraper.call
     end
+
+    # Check if the last run file exists
+    if File.exist?(last_run_file)
+      last_run_data = JSON.parse(File.read(last_run_file))
+      last_run_time = Time.parse(last_run_data['last_run'])
+
+      # Check if the scraper was run within the last 24 hours
+      if last_run_time > 24.hours.ago
+        render json: { message: "Scraper was run recently at #{last_run_time}" }, status: :ok and return
+      end
+    end
+
+    # Process CSV data
     CSV.foreach(csv_file_path, headers: true) do |row|
-      firstname = row['name'].split(' ')[0]
+      firstname = row['name'].split(' ')[0].gsub(/^Dr\.?/, '').strip
       lastname = row['name'].split(' ')[1..].join(' ')
       location = row['location']
 
@@ -21,8 +38,9 @@ class Api::V1::ScrapersController < ApplicationController
           description: row['description'],
           google_maps_url: row['google_maps_url'],
           phone_number: row['phone_number'].presence || "",
-          email: Faker::Internet.unique.email,
+          email: "#{lastname.downcase.gsub(' ', '.')}.#{firstname.downcase.gsub(' ', '.')}@gmail.com",
           password: "123456",
+          created_at: Faker::Date.between(from: Date.parse('2025-01-01'), to: Date.parse('2025-07-01')),
           password_confirmation: "123456",
           email_confirmed: true
         )
@@ -36,8 +54,22 @@ class Api::V1::ScrapersController < ApplicationController
       end
     end
 
-    render json: { 
-      message: "Doctors successfully imported!"
-    }
+    # Record the time of this execution
+    File.open(last_run_file, 'w') do |f|
+      f.write({ last_run: Time.current.to_s }.to_json)
+    end
+
+    render json: { message: "Doctors successfully imported!" }
+  end
+
+
+  def last_run
+    last_run_file = Rails.root.join('app/services/last_scraper_run.json')
+    if File.exist?(last_run_file)
+      last_run_data = JSON.parse(File.read(last_run_file))
+      render json: { last_run: last_run_data['last_run'] }, status: :ok
+    else
+      render json: { message: "No record of last run found." }, status: :not_found
+    end
   end
 end
