@@ -16,7 +16,7 @@ class Doctor < User
   ## Associations
   has_one_attached :avatar
   has_many :blogs, dependent: :destroy
-
+  has_many :consultations, dependent: :destroy
   def user_image_url
     # Get the URL of the associated image
     avatar.attached? ? url_for(avatar) : nil

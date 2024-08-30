@@ -2,6 +2,7 @@ class Blog < ApplicationRecord
   ##scopes
   scope :current, -> { where(is_archived: false) }
   ##Includes
+  include Rails.application.routes.url_helpers
 
   ## Callbacks
 
@@ -10,8 +11,13 @@ class Blog < ApplicationRecord
   validates :content, presence: true
   validates :images, presence: true, if: -> { images.attached? }
 
+
   ## Associations
-  belongs_to :doctor # Assuming only doctors can create blogs
+  has_many :messages, dependent: :destroy
+  belongs_to :doctor, class_name: 'User'
   has_many_attached :images
-  private
+  def image_urls
+    images.map { |image|  url_for(image) }
+  end
+
 end

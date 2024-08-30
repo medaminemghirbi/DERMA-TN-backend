@@ -1,3 +1,5 @@
+require 'yaml'
+
 class Api::V1::DoctorsController < ApplicationController
   before_action :authorize_request
     def  index
@@ -13,6 +15,23 @@ class Api::V1::DoctorsController < ApplicationController
   def destroy
     @Doctor = Doctor.find(params[:id])
     @Doctor.update(is_archived: true)
+  end
+
+  def unique_locations
+    # Load the YAML file and access the 'gouvernements' key
+    gouvernements = YAML.load_file(Rails.root.join('app', 'services', 'locations.yml'))['gouvernements']
+  
+    # Render the array directly as JSON
+    if gouvernements
+      render json: gouvernements, status: :ok
+    else
+      render json: { errors: 'No data found' }, status: :not_found
+    end
+  end
+  
+  def  get_doctors_by_locations
+    @doctors = Doctor.where(location: params[:location])
+    render json: @doctors
   end
 
   def activate_compte

@@ -11,63 +11,15 @@ Admin.create(  email: "Admin@example.com", firstname: "Admin", lastname:"Admin",
       lastname: Faker::Name.last_name,
       password: "123456",
       password_confirmation: "123456",
+      phone_number: rand(1_000_000..99_999_999).to_s.rjust(8, '0'),
+
       email_confirmed: true
     )
     downloaded_image = URI.open(Faker::Avatar.image)
     patient.avatar.attach(io: downloaded_image, filename: "#{patient.firstname}_avatar.jpg", content_type: 'image/jpg')
     puts "Created patient: #{patient.firstname} #{patient.lastname} (#{patient.email})"
-
-    # latitude = Faker::Number.between(from: 24.396308, to: 49.384358)
-    # longitude = Faker::Number.between(from: -125.0, to: -66.93457)
-    #   google_maps_url = "https://www.google.com/maps/search/?api=1&query=#{latitude},#{longitude}"
-    # doctor = Doctor.create(
-    #   email: Faker::Internet.unique.email,
-    #   firstname: Faker::Name.first_name,
-    #   lastname: Faker::Name.last_name,
-    #   password: "123456",
-    #   latitude: latitude,
-    #   longitude: longitude,
-    #   google_maps_url: google_maps_url,
-    #   password_confirmation: "123456",
-    #   email_confirmed: true
-    # )
-  
-    # # Attach a random avatar from the internet
-    # avatar_url = Faker::Avatar.image # Generates a random avatar image URL
-    # downloaded_image = URI.open(avatar_url)
-    
-    # doctor.avatar.attach(io: downloaded_image, filename: "#{doctor.firstname}_avatar.jpg", content_type: 'image/jpg')
-  
-    #puts "Created doctor: #{doctor.firstname} #{doctor.lastname} (#{doctor.email})"
-
   end
 
-
-  ##Load Doctors from csv
-  csv_file_path = Rails.root.join('db', 'doctors.csv')
-
-  CSV.foreach(csv_file_path, headers: true) do |row|
-    doctor = Doctor.create!(
-      firstname: row['name'].split(' ')[0],
-      lastname: row['name'].split(' ')[1..].join(' '),
-      location: row['location'],
-      description: row['description'],
-      google_maps_url: row['google_maps_url'],
-      phone_number: row['phone_number'].presence || "",
-      email: Faker::Internet.unique.email,
-      password: "123456",
-      password_confirmation: "123456",
-      email_confirmed: true
-    )
-  
-    # Download and attach the avatar
-    if row['avatar_src'].present?
-      avatar_url = row['avatar_src']
-      avatar_file = URI.open(avatar_url)
-      doctor.avatar.attach(io: avatar_file, filename: File.basename(avatar_url), content_type: avatar_file.content_type)
-    end
-  end
-  puts "Doctors successfully imported with avatars!"
     
 # Load diseases data from YAML file
 YAML.load_file(Rails.root.join('db', 'diseases.yml')).each do |disease_data|
@@ -102,5 +54,106 @@ YAML.load_file(Rails.root.join('db', 'diseases.yml')).each do |disease_data|
     puts "Image not found: #{image_path}"
   end
   puts "Created disease: #{disease_name}"
-  puts "seeding done"
+
+
+  puts "fake consutlation"
+  patients = Patient.all
+  doctors = Doctor.all
+
+# Ensure there are patients and doctors in the database
+  if patients.empty? || doctors.empty?
+    puts "No patients or doctors found in the database. Please create some first."
+  else
+    # Generate consultations
+    2000.times do
+      # Randomly select a patient and doctor
+      patient = patients.sample
+      doctor = doctors.sample
+
+      # Generate a random appointment time in the future
+      appointment_time = Faker::Time.forward(days: 30, period: :evening)
+
+      # Create the consultation record
+      consultation = Consultation.create(
+        appointment: appointment_time,
+        status: rand(0..2), # Assuming status is an integer where 0, 1, 2 represent different statuses
+        is_archived: [true, false].sample,
+        doctor_id: doctor.id,
+        patient_id: patient.id,
+        refus_reason: [nil, Faker::Lorem.sentence].sample # Random refusal reason or nil
+      )
+
+      puts "Created consultation for Patient ID: #{patient.id} with Doctor ID: #{doctor.id} on #{consultation.appointment}"
+    end
+
+    puts "seeding done"
+  end
+
+  puts "Seeding blogs..."
+
+  # Make sure you have some doctors in your database first
+  doctors = Doctor.all
+  starting_order = 1
+
+  if doctors.any?
+    10.times do |index|
+
+      blog = Blog.new(
+        title: Faker::Lorem.sentence(word_count: 6),
+        content: Faker::Lorem.paragraph(sentence_count: 15),
+        order: starting_order + index, # Incremental order value
+        doctor: doctors.sample
+      )
+
+      # Determine a random number of images (1, 3, or 5)
+      number_of_images = [1, 3, 5].sample
+
+      # Example image URLs from the internet (you can replace these with actual URLs)
+      image_urls = [
+        'https://res.cloudinary.com/void-elsan/image/upload/v1668002371/inline-images/Ecz%C3%A9ma.jpg',
+        'https://www.dexeryl-gamme.fr/sites/default/files/styles/featured_l_683x683_/public/images/featured/Image1.jpg?h=de238ad2&itok=jFdYeTNh',
+        'https://contourderm.com/wp-content/smush-webp/2016/08/leukotam.jpg.webp',
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/SolarAcanthosis.jpg/1200px-SolarAcanthosis.jpg',
+        'https://balmonds.com/cdn/shop/articles/Should-Keratosis-Be-Removed.jpg?v=1615555350'
+      ]
+
+      # Attach the selected number of images to the blog
+      number_of_images.times do
+        random_url = image_urls.sample
+        file = URI.open(random_url)
+        blog.images.attach(io: file, filename: "#{Faker::Lorem.word}.jpg")
+      end
+
+      blog.save!
+    end
+  else
+    puts "No doctors found. Please seed doctors first."
+  end
+
+  puts "Blogs seeded successfully!"
+
+  blogs = Blog.current
+
+# Define a list of example messages
+messages_content = [
+  "This is a great blog post!",
+  "I found this information very helpful.",
+  "Thanks for sharing this valuable content.",
+  "This is really insightful. I learned a lot.",
+  "Great read! I appreciate the detailed explanation."
+]
+
+blogs.each do |blog|
+  random_messages = messages_content.sample(3)
+
+  random_messages.each do |message_body|
+    Message.create!(
+      body: message_body,
+      sender: User.all.sample,
+      blog_id: blog.id
+    )
+  end
+end
+
+puts "Messages created for all blogs."
 end

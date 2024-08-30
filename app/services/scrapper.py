@@ -71,7 +71,7 @@ for gouvernement in gouvernements:
 
                 # Get the additional information from the doctor's profile
                 card_text_elem = profile_bs.find('div', class_='card-text')
-                additional_info = card_text_elem.text.strip() if card_text_elem else '#'
+                additional_info = card_text_elem.text.strip().replace('\n', ' ') if card_text_elem else '#'
                 doctor_info['description'] = additional_info
 
                 # Get the avatar image from the doctor's profile

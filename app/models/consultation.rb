@@ -8,10 +8,15 @@ class Consultation < ApplicationRecord
 
   ## Validations
   validates :appointment, presence: true
-  validates :docteur_id, presence: true
+  validates :doctor_id, presence: true
   validates :patient_id, presence: true
   ## Associations
-  belongs_to :docteur, class_name: 'User', foreign_key: 'docteur_id'
+  belongs_to :doctor, class_name: 'User', foreign_key: 'doctor_id'
   belongs_to :patient, class_name: 'User', foreign_key: 'patient_id'
-  private
+
+  def formatted_appointment
+    appointment = self[:appointment].is_a?(String) ? DateTime.parse(self[:appointment]) : self[:appointment]
+    appointment.strftime("%A, %d of %B %Y at %H:%M")
+
+  end
 end

@@ -1,32 +1,21 @@
 class Api::V1::MessagesController < ApplicationController
-  before_action :set_message, only: %i[ show update destroy ]
-
-  # GET /messages
+  before_action :set_user, only: %i[ create index]
   def index
-    if params[:candidature_id].present?
-      @messages = Message.all.includes(:sender)
-      render json: @messages.to_json(include: { sender: { methods: [:user_image_url] } })
-    end
+    @messages = Message.order(created_at: :asc)
+    render json: @messages.as_json(include: :sender)
   end
-
   # POST /messages
   def create
     @message = Message.new(message_params)
+    @message.sender_id = @user.id
     if @message.save
-      render json: @message.to_json(include: { sender: { methods: [:user_image_url] } }), status: :created, location: @message
+      ActionCable.server.broadcast 'MessagesChannel', @message.as_json(include: :sender)
+      render json: @message, status: :created
     else
       render json: @message.errors, status: :unprocessable_entity
     end
   end
 
-  # PATCH/PUT /messages/1
-  def update
-    if @message.update(message_params)
-      render json: @message
-    else
-      render json: @message.errors, status: :unprocessable_entity
-    end
-  end
 
   # DELETE /messages/1
   def destroy
@@ -34,9 +23,8 @@ class Api::V1::MessagesController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_message
-      @message = Message.find(params[:id])
+    def set_user
+      @user = User.find(params[:sender_id])
     end
 
     # Only allow a list of trusted parameters through.

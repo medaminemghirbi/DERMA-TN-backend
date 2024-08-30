@@ -1,9 +1,11 @@
 require 'faker'
 require 'json'
-
+require 'csv'
+require 'open-uri'
 class Api::V1::ScrapersController < ApplicationController
   def run
     csv_file_path = Rails.root.join('app/services/doctors_data.csv')
+
     last_run_file = Rails.root.join('app/services/last_scraper_run.json')
 
     # Check if the CSV file exists
@@ -11,20 +13,9 @@ class Api::V1::ScrapersController < ApplicationController
       RunScraper.call
     end
 
-    # Check if the last run file exists
-    if File.exist?(last_run_file)
-      last_run_data = JSON.parse(File.read(last_run_file))
-      last_run_time = Time.parse(last_run_data['last_run'])
-
-      # Check if the scraper was run within the last 24 hours
-      if last_run_time > 24.hours.ago
-        render json: { message: "Scraper was run recently at #{last_run_time}" }, status: :ok and return
-      end
-    end
-
     # Process CSV data
     CSV.foreach(csv_file_path, headers: true) do |row|
-      firstname = row['name'].split(' ')[0].gsub(/^Dr\.?/, '').strip
+      firstname = row['name'].split(' ')[0]
       lastname = row['name'].split(' ')[1..].join(' ')
       location = row['location']
 
@@ -42,7 +33,7 @@ class Api::V1::ScrapersController < ApplicationController
           password: "123456",
           created_at: Faker::Date.between(from: Date.parse('2025-01-01'), to: Date.parse('2025-07-01')),
           password_confirmation: "123456",
-          email_confirmed: true
+          email_confirmed: [true, false].sample 
         )
 
         # Download and attach the avatar if present

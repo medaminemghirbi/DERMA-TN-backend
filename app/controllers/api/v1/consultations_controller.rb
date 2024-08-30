@@ -61,10 +61,17 @@ class Api::V1::ConsultationsController < ApplicationController
 
   #render consultations by Doctors
   def doctor_consultations
-    @consultations = Consultation.current.where(docotor_id: params[:docotor_id]).all
-    render json: @consultations
+    @consultations = Consultation.current.where(doctor_id: params[:doctor_id])
+    render json: @consultations, 
+      each_serializer: Api::V1::ConsultationSerializer, 
+      include: {
+        doctor: { methods: [:user_image_url] },
+        patient: { methods: [:user_image_url] }
+    }
+    
+        
   end
-
+  
 
 
 
