@@ -10,7 +10,7 @@ include CurrentUserConcern
             Rails.cache.write("blacklist/#{token}", true, expires_in: time.to_i - Time.now.to_i)
             render json: {
                 logged_in: true,
-                user: @user,
+                user: @user.as_json(methods: [:user_image_url]),
                 type: @user.type,
                 token: token,
                 exp: time.strftime("%m-%d-%Y %H:%M")

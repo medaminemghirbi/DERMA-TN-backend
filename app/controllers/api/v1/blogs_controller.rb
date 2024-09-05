@@ -1,52 +1,71 @@
 class Api::V1::BlogsController < ApplicationController
   before_action :set_blog, only: [:show, :update, :destroy]
-  before_action :authorize_request
-
+  before_action :authorize_request, only: [:create, :update, :destroy]
   # GET /api/v1/blogs
   def index
-    @blogs = Blog.all
-    render json: @blogs, include: [:images]
+    blogs = Blog.order(:order).current.includes(:doctor).as_json(
+      methods: [:image_urls],
+      include: {
+        doctor: {
+          methods: [:user_image_url]
+        }
+      }
+    )
+    render json: blogs, status: :ok
   end
+  
 
   # GET /api/v1/blogs/:id
   def show
-    render json: @blog, include: [:images]
+    render json: @blog.as_json(
+      methods: :image_urls,
+      include: {
+        doctor: {
+          methods: [:user_image_url]
+        }
+      }
+    ), status: :ok
   end
-
+  
   # POST /api/v1/blogs
   def create
-    @blog = current_user.blogs.build(blog_params)
-
-    if @blog.save
-      render json: @blog, status: :created, location: api_v1_blog_url(@blog)
+    blog = Blog.new(blog_params)
+    blog.doctor = current_doctor
+    if blog.save
+      render json: blog, status: :created
     else
-      render json: @blog.errors, status: :unprocessable_entity
+      render json: { errors: blog.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
-  # PATCH/PUT /api/v1/blogs/:id
+  # DELETE /api/v1/blogs/:id
+  def destroy
+    @blog.update(is_archived: true)
+    render json: { message: 'Blog archived successfully' }, status: :ok
+  end
+
   def update
-    if @blog.update(blog_params)
+    # Only allow `is_verified` to be updated if included in the request
+    if @blog.update(blog_update_params)
       render json: @blog
     else
       render json: @blog.errors, status: :unprocessable_entity
     end
   end
 
-  # DELETE /api/v1/blogs/:id
-  def destroy
-    @blog.destroy
-    head :no_content
-  end
-
   private
 
   def set_blog
     @blog = Blog.find(params[:id])
+  rescue ActiveRecord::RecordNotFound
+    render json: { message: 'Blog not found' }, status: :not_found
   end
 
   def blog_params
-    params.permit(:title, :content, :docteur_id, images: [] )
+    params.permit(:title, :content, images: [])
   end
 
+  def blog_update_params
+    params.permit( :is_verified)
+  end
 end

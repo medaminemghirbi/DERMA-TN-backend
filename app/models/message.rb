@@ -10,13 +10,13 @@ class Message < ApplicationRecord
 
   ## Associations
   belongs_to :sender, class_name: 'User'
-  belongs_to :receiver, class_name: 'User'
-
+  belongs_to :blog
   private
   def broadcast_message
     ActionCable.server.broadcast('MessagesChannel', {
       id: self.id,
-      body: self.body
+      body: self.body,
+      sender_id: self.sender_id
     })
   end
 end
