@@ -1,7 +1,13 @@
 class Message < ApplicationRecord
+  include Rails.application.routes.url_helpers
   scope :current, -> { where(is_archived: false) }
   after_create_commit { broadcast_message }
   belongs_to :sender, class_name: 'User'
+  has_many_attached :images
+
+  def message_image_urls
+    images.attached? ? images.map { |image| url_for(image) } : nil
+  end
   private
 
   def broadcast_message
@@ -14,7 +20,8 @@ class Message < ApplicationRecord
         firstname: self.sender.firstname,
         lastname: self.sender.lastname
       },
-      created_at: self.created_at.strftime('%Y-%m-%d %H:%M:%S') # Adjust format if needed
+      created_at: self.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+      images: message_image_urls
     })
   end
 end

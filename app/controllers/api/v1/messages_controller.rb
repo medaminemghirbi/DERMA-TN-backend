@@ -3,22 +3,40 @@ class Api::V1::MessagesController < ApplicationController
 
   def index
     @messages = Message.order(created_at: :asc)
-    render json: @messages.as_json(include: { sender: { methods: [:user_image_url] } })
+    render json: @messages.as_json(
+      include: {
+        sender: { methods: [:user_image_url] }
+      },
+      methods: [:message_image_urls]
+    )
   end
-
+  
   # POST /messages
-  def create
-    @message = Message.new(message_params)
-    @message.sender_id = @user.id
+def create
+  @message = Message.new(message_params)
 
-    if @message.save
-      # Broadcast the message
-      ActionCable.server.broadcast 'MessagesChannel', @message.as_json(include: { sender: { methods: [:user_image_url] } })
-      render json: @message, status: :created
-    else
-      render json: @message.errors, status: :unprocessable_entity
+  if @message.save
+    if params[:images].present?
+      params[:images].each do |image|
+        @message.images.attach(image)
+      end
     end
+
+    # Include message_image_urls in the response
+    render json: {
+      message: "Message created successfully",
+      data: @message.as_json(
+        include: {
+          sender: { methods: [:user_image_url] }
+        },
+        methods: [:message_image_urls]
+      )
+    }, status: :created
+  else
+    render json: { errors: @message.errors.full_messages }, status: :unprocessable_entity
   end
+end
+
 
   # DELETE /messages/1
   def destroy
@@ -32,6 +50,6 @@ class Api::V1::MessagesController < ApplicationController
   end
 
   def message_params
-    params.require(:message).permit(:body, :sender_id)
+    params.require(:message).permit(:body, :sender_id, images: [])
   end
 end

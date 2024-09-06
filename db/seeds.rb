@@ -129,30 +129,4 @@ YAML.load_file(Rails.root.join('db', 'diseases.yml')).each do |disease_data|
   else
     puts "No doctors found. Please seed doctors first."
   end
-
-  puts "Blogs seeded successfully!"
-
-  blogs = Blog.current
-
-# Define a list of example messages
-messages_content = [
-  "This is a great blog post!",
-  "I found this information very helpful.",
-  "Thanks for sharing this valuable content.",
-  "This is really insightful. I learned a lot.",
-  "Great read! I appreciate the detailed explanation."
-]
-
-blogs.each do |blog|
-  random_messages = messages_content.sample(3)
-
-  random_messages.each do |message_body|
-    Message.create!(
-      body: message_body,
-      sender: User.all.sample
-      )
-  end
-end
-
-puts "Messages created for all blogs."
 end
