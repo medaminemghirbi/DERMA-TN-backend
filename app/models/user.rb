@@ -22,7 +22,10 @@ class User < ApplicationRecord
   has_many :sent_messages, class_name: 'Message'
   has_many :received_messages, class_name: 'Message'
   has_one :user_setting, dependent: :destroy
-
+  def user_image_url
+    # Get the URL of the associated image
+    avatar.attached? ? url_for(avatar) : nil
+  end
   private
 
   def create_user_settings_for_patient
@@ -52,8 +55,5 @@ class User < ApplicationRecord
     end while User.exists?(column => self[column])
   end
 
-  def user_image_url
-    # Get the URL of the associated image
-    avatar.attached? ? url_for(avatar) : nil
-  end
+
 end

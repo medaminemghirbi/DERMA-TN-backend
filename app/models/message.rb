@@ -1,23 +1,20 @@
 class Message < ApplicationRecord
-  ##scopes
   scope :current, -> { where(is_archived: false) }
-  ##Includes
-
-  ## Callbacks
   after_create_commit { broadcast_message }
-
-  ## Validations
-
-  ## Associations
   belongs_to :sender, class_name: 'User'
-  belongs_to :blog
   private
+
   def broadcast_message
     ActionCable.server.broadcast('MessagesChannel', {
       id: self.id,
       body: self.body,
-      sender_id: self.sender_id
+      sender_id: self.sender_id,
+      sender: {
+        user_image_url: self.sender.user_image_url,
+        firstname: self.sender.firstname,
+        lastname: self.sender.lastname
+      },
+      created_at: self.created_at.strftime('%Y-%m-%d %H:%M:%S') # Adjust format if needed
     })
   end
 end
-  

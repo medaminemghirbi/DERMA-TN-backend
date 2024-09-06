@@ -25,8 +25,8 @@ Rails.application.routes.draw do
           get 'get_doctors_by_locations/:location', to: 'doctors#get_doctors_by_locations'
           get 'doctor_consultations/:doctor_id', to: 'consultations#doctor_consultations'
           resources :doctors do
-          post 'activate_compte', on: :member
-        end
+            post 'activate_compte', on: :member
+          end
           resources :patients
           resources :consultations
           resources :blogs

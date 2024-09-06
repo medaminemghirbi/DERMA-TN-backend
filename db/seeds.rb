@@ -149,9 +149,8 @@ blogs.each do |blog|
   random_messages.each do |message_body|
     Message.create!(
       body: message_body,
-      sender: User.all.sample,
-      blog_id: blog.id
-    )
+      sender: User.all.sample
+      )
   end
 end
 
