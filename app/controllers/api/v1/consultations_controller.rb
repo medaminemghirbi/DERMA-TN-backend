@@ -1,6 +1,5 @@
 class Api::V1::ConsultationsController < ApplicationController
   before_action :set_consultation, only: [:show, :update, :destroy]
-  before_action :authorize_request
   # GET /consultations
   def index
     render json: Consultation.current
@@ -13,21 +12,33 @@ class Api::V1::ConsultationsController < ApplicationController
 
   # POST /consultations
   def create
-    @consultation = Consultation.new(consultation_params)  
-    # Check if start_date or end_date falls within a holiday
+    @consultation = Consultation.new(consultation_params)
     if Holiday.where(holiday_date: @consultation.appointment).exists?
       render json: { error: "You cannot add a consultation on a holiday." }, status: :unprocessable_entity
       return
     end
-  
+    if Consultation.where(appointment: @consultation.appointment, seance: @consultation.seance).where(status: :approved).exists?
+      render json: { error: "date not available" }, status: :unprocessable_entity
+      return
+    end
+    if Consultation.where(
+        appointment: @consultation.appointment,
+        seance: @consultation.seance,
+        doctor_id: @consultation.doctor_id,
+        patient_id: @consultation.patient_id,
+        status: @consultation.status
+      ).exists?
+      render json: { error: "you already created a consultation demande on this date" }, status: :unprocessable_entity
+      return
+    end
     if @consultation.save
-      DemandeMailer.send_mail_demande(@consultation.user, @consultation).deliver
+      #DemandeMailer.send_mail_demande(@consultation.user, @consultation).deliver
       render json: @consultation, status: :created
     else
       render json: @consultation.errors, status: :unprocessable_entity
     end
   end
-
+  
   def update
     @consultation = Consultation.find(params[:id])
     @patient = User.find(@consultation.patient_id)
@@ -59,18 +70,16 @@ class Api::V1::ConsultationsController < ApplicationController
     end
   end
 
-  #render consultations by Doctors
+  # render consultations by Doctors
   def doctor_consultations
     @consultations = Consultation.current.where(doctor_id: params[:doctor_id])
     render json: @consultations, 
-      each_serializer: Api::V1::ConsultationSerializer, 
       include: {
         doctor: { methods: [:user_image_url] },
         patient: { methods: [:user_image_url] }
-    }
-    
-        
+      }
   end
+
   
 
 
@@ -81,9 +90,9 @@ class Api::V1::ConsultationsController < ApplicationController
     end
 
     def consultation_params
-      params.permit(:appointment, :status, :refus_reason, :is_archived, :user_id, :id)
-    end  
-
+      params.permit(:appointment, :status, :refus_reason, :is_archived, :doctor_id, :patient_id, :seance)
+    end
+    
 
     def valid_status?(status)
       ["pending", "rejected", "approved"].include?(status)
