@@ -31,6 +31,7 @@ Rails.application.routes.draw do
           resources :consultations
           resources :blogs
           resources :messages
+          resources :holidays
           get 'reload_data', to: 'scrapers#run'
           get 'last_run', to: 'scrapers#last_run'
         end

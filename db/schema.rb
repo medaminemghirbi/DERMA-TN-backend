@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_08_20_143300) do
+ActiveRecord::Schema[7.0].define(version: 2024_09_09_160914) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -55,17 +55,23 @@ ActiveRecord::Schema[7.0].define(version: 2024_08_20_143300) do
   end
 
   create_table "consultations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.datetime "appointment", null: false
+    t.date "appointment", null: false
     t.integer "status", default: 0
     t.boolean "is_archived", default: false
     t.uuid "doctor_id", null: false
     t.uuid "patient_id", null: false
+    t.integer "seance", null: false
     t.string "refus_reason"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["appointment", "patient_id"], name: "index_consultations_on_appointment_and_patient_id", unique: true
-    t.index ["appointment"], name: "index_consultations_on_appointment"
-    t.index ["patient_id"], name: "index_consultations_on_patient_id"
+  end
+
+  create_table "holidays", force: :cascade do |t|
+    t.string "holiday_name", null: false
+    t.date "holiday_date", null: false
+    t.boolean "is_archived", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "maladies", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

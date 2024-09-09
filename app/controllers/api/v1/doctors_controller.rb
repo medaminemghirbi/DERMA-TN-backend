@@ -3,7 +3,7 @@ require 'yaml'
 class Api::V1::DoctorsController < ApplicationController
   before_action :authorize_request
     def  index
-      render json: Doctor.current.all, each_serializer: Api::V1::DoctorSerializer
+      render json: Doctor.current.all
     end
 
   def show

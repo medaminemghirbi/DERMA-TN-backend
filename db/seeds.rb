@@ -3,8 +3,18 @@ require 'open-uri'
 require 'yaml'
 require 'csv'
 puts "seeding"
-Admin.create(  email: "Admin@example.com", firstname: "Admin", lastname:"Admin", password: "123456", password_confirmation: "123456", email_confirmed: true)
-  10.times do
+admin = Admin.create(  email: "Admin@example.com", firstname: "Admin", lastname:"Admin", password: "123456", password_confirmation: "123456", email_confirmed: true)
+image_url = "https://c8.alamy.com/comp/2H36T4F/three-persons-admin-icon-outline-three-persons-admin-vector-icon-color-flat-isolated-2H36T4F.jpg"
+image_file = URI.open(image_url)
+
+# Attach the image to the Admin record
+admin.avatar.attach(
+  io: image_file,
+  filename: "admin_avatar.jpg",
+  content_type: "image/jpeg"
+)
+  
+10.times do
     patient = Patient.create(
       email: Faker::Internet.unique.email,
       firstname: Faker::Name.first_name,
@@ -55,38 +65,39 @@ YAML.load_file(Rails.root.join('db', 'diseases.yml')).each do |disease_data|
   end
   puts "Created disease: #{disease_name}"
 
+  puts "Seeding consultations..."
 
-  puts "fake consutlation"
   patients = Patient.all
   doctors = Doctor.all
 
-# Ensure there are patients and doctors in the database
+  
+  # Ensure there are patients, doctors, and seances in the database
   if patients.empty? || doctors.empty?
-    puts "No patients or doctors found in the database. Please create some first."
+    puts "No patients, doctors, or seances found in the database. Please create some first."
   else
     # Generate consultations
-    2000.times do
-      # Randomly select a patient and doctor
+    100.times do
+      # Randomly select a patient, doctor, and seance
       patient = patients.sample
       doctor = doctors.sample
-
+  
       # Generate a random appointment time in the future
       appointment_time = Faker::Time.forward(days: 30, period: :evening)
-
+  
       # Create the consultation record
       consultation = Consultation.create(
         appointment: appointment_time,
-        status: rand(0..2), # Assuming status is an integer where 0, 1, 2 represent different statuses
-        is_archived: [true, false].sample,
+        status: Consultation.statuses.keys.sample, # Randomly select status
         doctor_id: doctor.id,
         patient_id: patient.id,
+        seance: Consultation.seances.keys.sample, # Randomly select status
         refus_reason: [nil, Faker::Lorem.sentence].sample # Random refusal reason or nil
       )
-
+  
       puts "Created consultation for Patient ID: #{patient.id} with Doctor ID: #{doctor.id} on #{consultation.appointment}"
     end
-
-    puts "seeding done"
+  
+    puts "Seeding done."
   end
 
   puts "Seeding blogs..."
@@ -129,4 +140,32 @@ YAML.load_file(Rails.root.join('db', 'diseases.yml')).each do |disease_data|
   else
     puts "No doctors found. Please seed doctors first."
   end
+
+
+
+  puts "Seeding holidays 2025..."
+# Set up the API endpoint URL
+url = URI("https://api.api-ninjas.com/v1/holidays?country=TN&year=2025&type=PUBLIC_HOLIDAY")
+
+# Set up the HTTP request
+request = Net::HTTP::Get.new(url)
+request['x-API-KEY'] = 'mYCPF5Bd6yRjMmCMSGkQnw==6aK6gP1eU5EjzpJw'  # Replace 'YOUR_API_KEY_HERE' with your actual API key
+
+# Make the HTTP request and parse the response
+response = Net::HTTP.start(url.hostname, url.port, use_ssl: true) do |http|
+  http.request(request)
+end
+
+# Parse the JSON response
+holidays_data = JSON.parse(response.body)
+# Seed the holidays table
+holidays_data.each do |holiday|
+  Holiday.create!(
+    holiday_name: holiday['name'],
+    holiday_date: holiday['date'],
+    is_archived: false
+  )
+end
+
+puts "Seeding completed! Created #{Holiday.count} holidays."
 end
