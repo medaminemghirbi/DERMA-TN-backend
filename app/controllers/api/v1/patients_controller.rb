@@ -2,7 +2,8 @@ class Api::V1::PatientsController < ApplicationController
   before_action :set_patient, only: [:destroy]
   before_action :authorize_request
     def  index
-      render json: Patient.current.all
+      @patients = Patient.current.all
+      render json: @patients.as_json(methods: [:user_image_url])
     end
 
   def destroy

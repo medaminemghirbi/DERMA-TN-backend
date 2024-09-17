@@ -33,6 +33,8 @@ module PFe2023Back
     config.middleware.use config.session_store, config.session_options
     config.autoload_paths << "#{Rails.root}/lib"
     config.autoload_paths += %W(#{config.root}/app/services)
+    config.autoload_paths += %W(#{config.root}/app/deep_learning)
+
 
   end
 end

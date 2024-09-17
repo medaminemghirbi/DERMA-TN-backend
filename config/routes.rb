@@ -16,6 +16,7 @@ Rails.application.routes.draw do
           get :confirm_email
         end
       end
+      post 'predict', to: 'predictions#predict'
 
       namespace :api do
         namespace :v1 do
@@ -31,9 +32,13 @@ Rails.application.routes.draw do
           resources :consultations
           resources :blogs
           resources :messages
+          get 'messages/:message_id/images/:image_id', to: 'messages#download_image'
           resources :holidays
           get 'reload_data', to: 'scrapers#run'
           get 'last_run', to: 'scrapers#last_run'
+          delete 'destroy_all', to: 'messages#destroy_all'
+          get 'doctor_consultations_today/:doctor_id', to: 'consultations#doctor_consultations_today'
+
         end
       end
 

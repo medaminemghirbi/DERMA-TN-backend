@@ -7,6 +7,8 @@ class CreateConsultations < ActiveRecord::Migration[7.0]
       t.uuid :doctor_id, null: false
       t.uuid :patient_id, null: false
       t.integer :seance, null: false, unique: true
+      t.datetime :start_at, null: false
+      t.datetime :end_at, null: false
       t.string :refus_reason
       t.timestamps
     end

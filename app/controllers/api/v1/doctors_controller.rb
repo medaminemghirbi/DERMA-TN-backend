@@ -3,7 +3,8 @@ require 'yaml'
 class Api::V1::DoctorsController < ApplicationController
   before_action :authorize_request
     def  index
-      render json: Doctor.current.all
+      doctors = Doctor.current.all
+      render json: doctors.as_json(methods: [:user_image_url])
     end
 
   def show
