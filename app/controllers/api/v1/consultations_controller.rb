@@ -81,6 +81,32 @@ class Api::V1::ConsultationsController < ApplicationController
   end
 
   
+  def doctor_consultations_today
+    today = Date.current
+  
+    @consultations = Consultation.current
+                                  .where(doctor_id: params[:doctor_id], appointment: today)
+    
+    # Sort the consultations in Ruby
+    @consultations = @consultations.sort_by do |consultation|
+      seance = consultation.seance
+      # Convert seance to a sortable format
+      if seance.include?(":")
+        # Handle time format "HH:MM"
+        hours, minutes = seance.split(":").map(&:to_i)
+        hours * 60 + minutes
+      else
+        # Handle numeric format
+        seance.to_i * 60
+      end
+    end
+  
+    render json: @consultations, 
+      include: {
+        patient: { methods: [:user_image_url] }
+      }
+  end
+  
 
 
 

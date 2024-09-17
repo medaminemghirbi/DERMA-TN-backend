@@ -1,8 +1,16 @@
 class Api::V1::MessagesController < ApplicationController
   before_action :set_user, only: %i[create]
-
+  
+  def download_image
+    image = Message.find(params[:message_id]).images.find_by(id: params[:image_id])
+    if image
+      redirect_to rails_blob_path(image, disposition: "attachment")
+    else
+      render json: { error: 'Image not found' }, status: :not_found
+    end
+  end
   def index
-    @messages = Message.order(created_at: :asc)
+    @messages = Message.current.order(created_at: :asc)
     render json: @messages.as_json(
       include: {
         sender: { methods: [:user_image_url] }
@@ -40,8 +48,10 @@ end
 
   # DELETE /messages/1
   def destroy
+    @message = Message.find(params[:id])
     @message.destroy
   end
+
 
   private
 

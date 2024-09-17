@@ -3,10 +3,15 @@ class Message < ApplicationRecord
   scope :current, -> { where(is_archived: false) }
   after_create_commit { broadcast_message }
   belongs_to :sender, class_name: 'User'
-  has_many_attached :images
+  has_many_attached :images, dependent: :destroy
 
   def message_image_urls
-    images.attached? ? images.map { |image| url_for(image) } : nil
+    images.map do |image|
+      {
+        id: image.id,
+        url: url_for(image)
+      }
+    end
   end
   private
 

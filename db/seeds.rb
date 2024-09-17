@@ -76,7 +76,7 @@ YAML.load_file(Rails.root.join('db', 'diseases.yml')).each do |disease_data|
     puts "No patients, doctors, or seances found in the database. Please create some first."
   else
     # Generate consultations
-    100.times do
+    1000.times do
       # Randomly select a patient, doctor, and seance
       patient = patients.sample
       doctor = doctors.sample
@@ -90,7 +90,7 @@ YAML.load_file(Rails.root.join('db', 'diseases.yml')).each do |disease_data|
         status: Consultation.statuses.keys.sample, # Randomly select status
         doctor_id: doctor.id,
         patient_id: patient.id,
-        seance: Consultation.seances.keys.sample, # Randomly select status
+        seance: [1, 11].sample, # Randomly select status
         refus_reason: [nil, Faker::Lorem.sentence].sample # Random refusal reason or nil
       )
   
@@ -166,6 +166,15 @@ holidays_data.each do |holiday|
     is_archived: false
   )
 end
+doctor = Doctor.create(  email: "doctor@example.com", firstname: "doctor", lastname:"doctor", password: "123456", password_confirmation: "123456", email_confirmed: true)
+image_url = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSuuglfNWvcq31xl6m59EILUlrc8vmav-d3UQ&s"
+image_file = URI.open(image_url)
 
+# Attach the image to the doctor record
+doctor.avatar.attach(
+  io: image_file,
+  filename: "admin_avatar.jpg",
+  content_type: "image/jpeg"
+)
 puts "Seeding completed! Created #{Holiday.count} holidays."
 end

@@ -9,7 +9,7 @@
 
 #Ignore .byebug_history
 .byebug_history
-
+.vscode/settings.json
 # Ignore the default SQLite database.
 /db/*.sqlite3
 /db/*.sqlite3-*
@@ -40,3 +40,6 @@
 /config/master.key
 
 database.yml
+
+# Ignore the val folder in deep_learning
+app/deep_learning/val/
