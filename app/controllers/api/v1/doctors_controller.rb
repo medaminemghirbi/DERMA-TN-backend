@@ -35,6 +35,25 @@ class Api::V1::DoctorsController < ApplicationController
     render json: @doctors
   end
 
+
+  def upgrade_doctor_plan
+    @doctor = Doctor.find_by(id: params[:id])
+    if @doctor
+      # Check if the plan is 'custom'
+      if params[:plan] == 'custom'
+        # Update plan and custom_plan if plan is 'custom'
+        @doctor.update(plan: params[:plan], custom_limit: params[:customLimit])
+      else
+        # Only update the plan if it's not 'custom'
+        @doctor.update(plan: params[:plan])
+      end
+  
+      render json: { success: true, message: 'Plan updated successfully' }
+    else
+      render json: { success: false, message: 'Doctor not found' }, status: :not_found
+    end
+  end
+  
   def activate_compte
     @doctor = Doctor.find(params[:id])
 

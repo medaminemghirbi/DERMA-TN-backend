@@ -30,8 +30,13 @@ admin.avatar.attach(
     puts "Created patient: #{patient.firstname} #{patient.lastname} (#{patient.email})"
   end
 
-    
+  ###########################Seeding Maladie ##################################
+  ##################################################################################
+  ##################################################################################
+
 # Load diseases data from YAML file
+starting_order = 0
+
 YAML.load_file(Rails.root.join('db', 'diseases.yml')).each do |disease_data|
   # Extract data from the YAML file
   disease_name = disease_data['maladie_name']
@@ -44,7 +49,7 @@ YAML.load_file(Rails.root.join('db', 'diseases.yml')).each do |disease_data|
   diagnosis = disease_data['diagnosis']
   references = disease_data['references']
   image_path = Rails.root.join('app', 'assets', 'images', disease_data['image_path']).to_s
-  
+  starting_order = starting_order+1
   # Create the Disease record
   disease = Maladie.create(
     maladie_name: disease_name,
@@ -55,7 +60,8 @@ YAML.load_file(Rails.root.join('db', 'diseases.yml')).each do |disease_data|
     treatments: treatments,
     prevention: prevention,
     diagnosis: diagnosis,
-    references: references
+    references: references,
+    order: starting_order
   )
   # Attach the image
   if File.exist?(image_path)
@@ -64,46 +70,53 @@ YAML.load_file(Rails.root.join('db', 'diseases.yml')).each do |disease_data|
     puts "Image not found: #{image_path}"
   end
   puts "Created disease: #{disease_name}"
+  ##################################################################################
+  ##################################################################################
+  ##################################################################################
+
+
+  ###########################Seeding Consultation ##################################
+  ##################################################################################
+  ##################################################################################
 
   puts "Seeding consultations..."
-
   patients = Patient.all
   doctors = Doctor.all
-
-  
-  # Ensure there are patients, doctors, and seances in the database
-  if patients.empty? || doctors.empty?
+  seances = Seance.all
+  if patients.empty? || doctors.empty? || seances.empty?
     puts "No patients, doctors, or seances found in the database. Please create some first."
   else
-    # Generate consultations
     1000.times do
-      # Randomly select a patient, doctor, and seance
       patient = patients.sample
       doctor = doctors.sample
-  
-      # Generate a random appointment time in the future
+      seance = seances.sample
       appointment_time = Faker::Time.forward(days: 30, period: :evening)
-  
-      # Create the consultation record
       consultation = Consultation.create(
         appointment: appointment_time,
-        status: Consultation.statuses.keys.sample, # Randomly select status
+        status: Consultation.statuses.keys.sample,  # Randomly select status
         doctor_id: doctor.id,
         patient_id: patient.id,
-        seance: [1, 11].sample, # Randomly select status
+        seance_id: seance.id,                      # Assign seance_id from Seance model
         refus_reason: [nil, Faker::Lorem.sentence].sample # Random refusal reason or nil
       )
-  
-      puts "Created consultation for Patient ID: #{patient.id} with Doctor ID: #{doctor.id} on #{consultation.appointment}"
+      puts "Created consultation for Patient ID: #{patient.id} with Doctor ID: #{doctor.id} on #{consultation.appointment}, Seance: #{seance.start_time} - #{seance.end_time}"
     end
-  
     puts "Seeding done."
   end
 
-  puts "Seeding blogs..."
+###################################################################################
+###################################################################################
+###################################################################################
 
+  ###########################Seeding Blogs ##################################
+  ##################################################################################
+  ##################################################################################
+
+  puts "Seeding blogs..."
   # Make sure you have some doctors in your database first
   doctors = Doctor.all
+  maladies = Maladie.all
+
   starting_order = 1
 
   if doctors.any?
@@ -113,7 +126,8 @@ YAML.load_file(Rails.root.join('db', 'diseases.yml')).each do |disease_data|
         title: Faker::Lorem.sentence(word_count: 6),
         content: Faker::Lorem.paragraph(sentence_count: 15),
         order: starting_order + index, # Incremental order value
-        doctor: doctors.sample
+        doctor: doctors.sample,
+        maladie: maladies.sample
       )
 
       # Determine a random number of images (1, 3, or 5)
@@ -140,41 +154,51 @@ YAML.load_file(Rails.root.join('db', 'diseases.yml')).each do |disease_data|
   else
     puts "No doctors found. Please seed doctors first."
   end
+  ###################################################################################
+  ###################################################################################
+  ###################################################################################
+
+  ###########################Seeding Holidays ##################################
+  ##################################################################################
+  ##################################################################################
 
 
 
   puts "Seeding holidays 2025..."
-# Set up the API endpoint URL
-url = URI("https://api.api-ninjas.com/v1/holidays?country=TN&year=2025&type=PUBLIC_HOLIDAY")
+    # Set up the API endpoint URL
+    url = URI("https://api.api-ninjas.com/v1/holidays?country=TN&year=2025&type=PUBLIC_HOLIDAY")
 
-# Set up the HTTP request
-request = Net::HTTP::Get.new(url)
-request['x-API-KEY'] = 'mYCPF5Bd6yRjMmCMSGkQnw==6aK6gP1eU5EjzpJw'  # Replace 'YOUR_API_KEY_HERE' with your actual API key
+    # Set up the HTTP request
+    request = Net::HTTP::Get.new(url)
+    request['x-API-KEY'] = 'mYCPF5Bd6yRjMmCMSGkQnw==6aK6gP1eU5EjzpJw'  # Replace 'YOUR_API_KEY_HERE' with your actual API key
 
-# Make the HTTP request and parse the response
-response = Net::HTTP.start(url.hostname, url.port, use_ssl: true) do |http|
-  http.request(request)
-end
+    # Make the HTTP request and parse the response
+    response = Net::HTTP.start(url.hostname, url.port, use_ssl: true) do |http|
+      http.request(request)
+    end
 
-# Parse the JSON response
-holidays_data = JSON.parse(response.body)
-# Seed the holidays table
-holidays_data.each do |holiday|
-  Holiday.create!(
-    holiday_name: holiday['name'],
-    holiday_date: holiday['date'],
-    is_archived: false
-  )
-end
-doctor = Doctor.create(  email: "doctor@example.com", firstname: "doctor", lastname:"doctor", password: "123456", password_confirmation: "123456", email_confirmed: true)
-image_url = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSuuglfNWvcq31xl6m59EILUlrc8vmav-d3UQ&s"
-image_file = URI.open(image_url)
+    # Parse the JSON response
+    holidays_data = JSON.parse(response.body)
+    # Seed the holidays table
+    holidays_data.each do |holiday|
+      Holiday.create!(
+        holiday_name: holiday['name'],
+        holiday_date: holiday['date'],
+        is_archived: false
+      )
+    end
+    doctor = Doctor.create(  email: "doctor@example.com", firstname: "doctor", lastname:"doctor", password: "123456", password_confirmation: "123456", email_confirmed: true)
+    image_url = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSuuglfNWvcq31xl6m59EILUlrc8vmav-d3UQ&s"
+    image_file = URI.open(image_url)
 
-# Attach the image to the doctor record
-doctor.avatar.attach(
-  io: image_file,
-  filename: "admin_avatar.jpg",
-  content_type: "image/jpeg"
-)
-puts "Seeding completed! Created #{Holiday.count} holidays."
-end
+    # Attach the image to the doctor record
+    doctor.avatar.attach(
+      io: image_file,
+      filename: "admin_avatar.jpg",
+      content_type: "image/jpeg"
+    )
+    puts "Seeding completed! Created #{Holiday.count} holidays."
+  end
+###################################################################################
+###################################################################################
+###################################################################################

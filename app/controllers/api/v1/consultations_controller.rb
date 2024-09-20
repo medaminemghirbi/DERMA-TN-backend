@@ -107,7 +107,27 @@ class Api::V1::ConsultationsController < ApplicationController
       }
   end
   
+  def available_seances
+    date = params[:date]
+    doctor_id = params[:doctor_id]
 
+    # Ensure both parameters are provided
+    if date.present? && doctor_id.present?
+      available_seances = Consultation.available_seances_for_date(date, doctor_id)
+
+      render json: {
+        available_seances: available_seances.map do |seance|
+          {
+            id: seance.id,
+            start_time: seance.start_time.strftime('%H:%M'), # Format start_at as HH:MM
+            end_time: seance.end_time.strftime('%H:%M')    # Format end_at as HH:MM
+          }
+        end
+      }
+    else
+      render json: { status: 'error', message: 'Date and doctor_id are required' }, status: :bad_request
+    end
+  end
 
 
   private

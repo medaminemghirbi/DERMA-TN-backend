@@ -4,6 +4,8 @@ class CreateBlogs < ActiveRecord::Migration[7.0]
       t.string :title
       t.text :content
       t.uuid :doctor_id, null: false
+      t.uuid :maladie_id, null: false
+
       t.boolean :is_archived, default: false
       t.boolean :is_verified, default: false
       t.integer :order, default: 1
