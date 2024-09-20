@@ -27,6 +27,9 @@ class CreateUsers < ActiveRecord::Migration[7.0]
       #Add  Patient-specific fields
 
       t.string :medical_history
+      t.integer :plan, default: 0
+      t.integer :custom_limit, default: 0
+
       t.timestamps
 
     end

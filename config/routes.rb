@@ -16,10 +16,11 @@ Rails.application.routes.draw do
           get :confirm_email
         end
       end
-      post 'predict', to: 'predictions#predict'
+      post 'predict/:doctor_id', to: 'predictions#predict'
 
       namespace :api do
         namespace :v1 do
+          get 'consultations/available_seances', to: 'consultations#available_seances'
           get 'statistique', to: 'users#count_all_for_admin'
           get 'all_locations', to: 'doctors#unique_locations'
 
@@ -31,6 +32,8 @@ Rails.application.routes.draw do
           resources :patients
           resources :consultations
           resources :blogs
+          resources :maladies
+
           resources :messages
           get 'messages/:message_id/images/:image_id', to: 'messages#download_image'
           resources :holidays
@@ -38,6 +41,7 @@ Rails.application.routes.draw do
           get 'last_run', to: 'scrapers#last_run'
           delete 'destroy_all', to: 'messages#destroy_all'
           get 'doctor_consultations_today/:doctor_id', to: 'consultations#doctor_consultations_today'
+          patch 'doctors/:id/upgrade_plan', to: 'doctors#upgrade_doctor_plan'
 
         end
       end

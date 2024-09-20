@@ -15,6 +15,8 @@ class Blog < ApplicationRecord
   ## Associations
   has_many :messages, dependent: :destroy
   belongs_to :doctor, class_name: 'User'
+  belongs_to :maladie
+
   has_many_attached :images
   def image_urls
     images.map { |image|  url_for(image) }

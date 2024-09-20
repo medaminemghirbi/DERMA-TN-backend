@@ -3,16 +3,18 @@ class Api::V1::BlogsController < ApplicationController
   before_action :authorize_request, only: [:create, :update, :destroy]
   # GET /api/v1/blogs
   def index
-    blogs = Blog.order(:order).current.includes(:doctor).as_json(
+    blogs = Blog.order(:order).current.includes(:doctor, :maladie).as_json(
       methods: [:image_urls],
       include: {
         doctor: {
           methods: [:user_image_url]
-        }
+        },
+        maladie: {} # Ensure you include the `maladie` association
       }
     )
     render json: blogs, status: :ok
   end
+  
   
 
   # GET /api/v1/blogs/:id
@@ -22,7 +24,8 @@ class Api::V1::BlogsController < ApplicationController
       include: {
         doctor: {
           methods: [:user_image_url]
-        }
+        },
+        maladie: {} # Ensure you include the `maladie` association
       }
     ), status: :ok
   end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_09_09_130543) do
+ActiveRecord::Schema[7.0].define(version: 2024_09_19_132523) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -52,6 +52,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_09_09_130543) do
     t.serial "order"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "maladie_id"
   end
 
   create_table "consultations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -60,12 +61,18 @@ ActiveRecord::Schema[7.0].define(version: 2024_09_09_130543) do
     t.boolean "is_archived", default: false
     t.uuid "doctor_id", null: false
     t.uuid "patient_id", null: false
-    t.integer "seance", null: false
+    t.uuid "seance_id", null: false
     t.datetime "start_at", null: false
     t.datetime "end_at", null: false
     t.string "refus_reason"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "doctor_usages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "doctor_id", null: false
+    t.date "date", null: false
+    t.integer "count", default: 0
   end
 
   create_table "holidays", force: :cascade do |t|
@@ -89,6 +96,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_09_09_130543) do
     t.boolean "is_archived", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.serial "order"
   end
 
   create_table "messages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -97,6 +105,13 @@ ActiveRecord::Schema[7.0].define(version: 2024_09_09_130543) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.uuid "sender_id"
+  end
+
+  create_table "seances", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.time "start_time"
+    t.time "end_time"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "user_settings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -135,11 +150,15 @@ ActiveRecord::Schema[7.0].define(version: 2024_09_09_130543) do
     t.string "medical_history"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "plan", default: 0
+    t.integer "custom_limit", default: 0
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "consultations", "seances"
   add_foreign_key "consultations", "users", column: "doctor_id"
   add_foreign_key "consultations", "users", column: "patient_id"
+  add_foreign_key "doctor_usages", "users", column: "doctor_id"
   add_foreign_key "user_settings", "users"
 end
