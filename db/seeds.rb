@@ -4,7 +4,7 @@ require 'yaml'
 require 'csv'
 puts "seeding"
 admin = Admin.create(  email: "Admin@example.com", firstname: "Admin", lastname:"Admin", password: "123456", password_confirmation: "123456", email_confirmed: true)
-image_url = "https://c8.alamy.com/comp/2H36T4F/three-persons-admin-icon-outline-three-persons-admin-vector-icon-color-flat-isolated-2H36T4F.jpg"
+image_url = "https://thumbs.dreamstime.com/b/admin-reliure-de-bureau-sur-le-bureau-en-bois-sur-la-table-crayon-color%C3%A9-79046621.jpg"
 image_file = URI.open(image_url)
 
 # Attach the image to the Admin record
@@ -96,7 +96,8 @@ YAML.load_file(Rails.root.join('db', 'diseases.yml')).each do |disease_data|
         status: Consultation.statuses.keys.sample,  # Randomly select status
         doctor_id: doctor.id,
         patient_id: patient.id,
-        seance_id: seance.id,                      # Assign seance_id from Seance model
+        seance_id: seance.id,
+        is_archived: false,                      # Assign seance_id from Seance model
         refus_reason: [nil, Faker::Lorem.sentence].sample # Random refusal reason or nil
       )
       puts "Created consultation for Patient ID: #{patient.id} with Doctor ID: #{doctor.id} on #{consultation.appointment}, Seance: #{seance.start_time} - #{seance.end_time}"
@@ -198,7 +199,6 @@ YAML.load_file(Rails.root.join('db', 'diseases.yml')).each do |disease_data|
       content_type: "image/jpeg"
     )
     puts "Seeding completed! Created #{Holiday.count} holidays."
-  end
 ###################################################################################
 ###################################################################################
 ###################################################################################
