@@ -2,6 +2,17 @@ require 'yaml'
 
 class Api::V1::DoctorsController < ApplicationController
   before_action :authorize_request
+  def getDoctorStatistique
+    @consultations = Consultation.current.where(doctor_id: params[:doctor_id]).count
+    @blogs = Blog.current.where(doctor_id: params[:doctor_id]).count
+    @ia_usages =  DoctorUsage.current.where(doctor_id: params[:doctor_id])
+    total_ia_usage_count = @ia_usages.sum(:count)
+    render json: {
+      consultation: @consultations,
+      blogs: @blogs,
+      ia_usage: total_ia_usage_count
+    }
+  end
     def  index
       doctors = Doctor.current.all
       render json: doctors.as_json(methods: [:user_image_url])
@@ -70,5 +81,6 @@ class Api::V1::DoctorsController < ApplicationController
     #@doctors = Doctor.near([current_latitude, current_longitude], 10) # 10 km radius
     render json: @doctors
   end
+
 
 end

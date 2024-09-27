@@ -15,8 +15,32 @@ class Api::V1::BlogsController < ApplicationController
     render json: blogs, status: :ok
   end
   
+  def verified_blogs
+    blogs = Blog.where(is_verified:true).order(:order).current.includes(:doctor, :maladie).as_json(
+      methods: [:image_urls],
+      include: {
+        doctor: {
+          methods: [:user_image_url]
+        },
+        maladie: {} # Ensure you include the `maladie` association
+      }
+    )
+    render json: blogs, status: :ok
+  end
   
-
+  
+  def my_blogs
+    blogs = Blog.where(doctor_id: params[:doctor_id]).order(:order).current.includes(:doctor, :maladie).as_json(
+      methods: [:image_urls],
+      include: {
+        doctor: {
+          methods: [:user_image_url]
+        },
+        maladie: {}
+      }
+    )
+    render json: blogs, status: :ok
+  end
   # GET /api/v1/blogs/:id
   def show
     render json: @blog.as_json(
@@ -33,7 +57,7 @@ class Api::V1::BlogsController < ApplicationController
   # POST /api/v1/blogs
   def create
     blog = Blog.new(blog_params)
-    blog.doctor = current_doctor
+    blog.doctor = Doctor.find params[:doctor_id]
     if blog.save
       render json: blog, status: :created
     else
@@ -65,7 +89,7 @@ class Api::V1::BlogsController < ApplicationController
   end
 
   def blog_params
-    params.permit(:title, :content, images: [])
+    params.permit(:title, :content, :maladie_id, :doctor_id, images: [])
   end
 
   def blog_update_params

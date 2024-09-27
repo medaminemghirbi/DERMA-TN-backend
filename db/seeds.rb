@@ -82,25 +82,22 @@ YAML.load_file(Rails.root.join('db', 'diseases.yml')).each do |disease_data|
   puts "Seeding consultations..."
   patients = Patient.all
   doctors = Doctor.all
-  seances = Seance.all
-  if patients.empty? || doctors.empty? || seances.empty?
-    puts "No patients, doctors, or seances found in the database. Please create some first."
+  if patients.empty? || doctors.empty?
+    puts "No patients, doctors,  found in the database. Please create some first."
   else
     1000.times do
       patient = patients.sample
       doctor = doctors.sample
-      seance = seances.sample
       appointment_time = Faker::Time.forward(days: 30, period: :evening)
       consultation = Consultation.create(
         appointment: appointment_time,
         status: Consultation.statuses.keys.sample,  # Randomly select status
         doctor_id: doctor.id,
         patient_id: patient.id,
-        seance_id: seance.id,
-        is_archived: false,                      # Assign seance_id from Seance model
+        is_archived: false,                    
         refus_reason: [nil, Faker::Lorem.sentence].sample # Random refusal reason or nil
       )
-      puts "Created consultation for Patient ID: #{patient.id} with Doctor ID: #{doctor.id} on #{consultation.appointment}, Seance: #{seance.start_time} - #{seance.end_time}"
+      puts "Created consultation for Patient ID: #{patient.id} with Doctor ID: #{doctor.id} on #{consultation.appointment}"
     end
     puts "Seeding done."
   end
@@ -188,17 +185,8 @@ YAML.load_file(Rails.root.join('db', 'diseases.yml')).each do |disease_data|
         is_archived: false
       )
     end
-    doctor = Doctor.create(  email: "doctor@example.com", firstname: "doctor", lastname:"doctor", password: "123456", password_confirmation: "123456", email_confirmed: true)
-    image_url = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSuuglfNWvcq31xl6m59EILUlrc8vmav-d3UQ&s"
-    image_file = URI.open(image_url)
-
-    # Attach the image to the doctor record
-    doctor.avatar.attach(
-      io: image_file,
-      filename: "admin_avatar.jpg",
-      content_type: "image/jpeg"
-    )
     puts "Seeding completed! Created #{Holiday.count} holidays."
+  end
 ###################################################################################
 ###################################################################################
 ###################################################################################

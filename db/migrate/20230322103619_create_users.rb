@@ -24,6 +24,13 @@ class CreateUsers < ActiveRecord::Migration[7.0]
       t.float :longitude
       t.string :google_maps_url
       t.string :description
+
+      t.string :website
+      t.string :twitter
+      t.string :youtube
+      t.string :facebook
+      t.string :linkedin
+
       #Add  Patient-specific fields
 
       t.string :medical_history

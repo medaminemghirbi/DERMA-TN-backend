@@ -19,13 +19,15 @@ class PredictionsController < ApplicationController
     # Call the Machine Learning service with the image path
     prediction_output = RunMachineLearning.call(image_path)
 
-    # Track doctor's usage
-    DoctorUsage.track_usage(doctor)
     # Ensure the output is not nil or empty
     if prediction_output.nil? || prediction_output.empty?
       render json: { error: 'Failed to get a valid prediction from the model' }, status: 500
       return
     end
+
+    # Track doctor's usage
+    DoctorUsage.track_usage(doctor)
+
 
     # Parse the output from the Python script
     lines = prediction_output.split("\n")

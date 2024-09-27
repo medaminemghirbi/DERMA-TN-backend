@@ -6,43 +6,36 @@ class Consultation < ApplicationRecord
   ## Includes
 
   ## Callbacks
-  before_save :set_start_and_end_time
 
   ## Validations
-  validate :reserved
+  validates :appointment, presence: true
+  validate :verified_consultation_booked, on: :create
 
   ## Associations
   belongs_to :doctor, class_name: 'User', foreign_key: 'doctor_id'
   belongs_to :patient, class_name: 'User', foreign_key: 'patient_id'
-  belongs_to :seance
 
-  ## Set start_at and end_at automatically before saving
-  def set_start_and_end_time
-    return unless seance.present?
 
-    appointment_date = appointment.to_date
-
-    # Combine appointment date with the seance start and end times
-    self.start_at = Time.zone.parse("#{appointment_date} #{seance.start_time.strftime('%H:%M')}")
-    self.end_at = Time.zone.parse("#{appointment_date} #{seance.end_time.strftime('%H:%M')}")
-  end
+  TIME_SLOTS = [
+  { time: "09:00" },
+  { time: "09:30" },
+  { time: "10:00" },
+  { time: "10:30" },
+  { time: "11:00" },
+  { time: "11:30" },
+  { time: "12:00" },
+  { time: "13:30" },
+  { time: "14:00" },
+  { time: "14:30" },
+  { time: "15:00" },
+  { time: "15:30" },
+  { time: "16:00" }
+]
 
   private
-
-  def reserved
-    if Consultation.where(doctor_id: doctor_id, appointment: appointment, seance: seance).exists?
-      errors.add(:base, "The doctor is already booked for this time slot.")
+  def verified_consultation_booked
+    if Consultation.where(appointment: appointment, status: :approved, doctor_id: doctor_id).exists?
+      errors.add(:appointment, "is already booked for an approved consultation at this time.")
     end
-  end
-
-  def self.available_seances_for_date(date, doctor_id)
-    # Fetch all Seance records
-    all_seances = Seance.all
-
-    # Find consultations for the given date and doctor that are approved
-    booked_seances = Consultation.where(appointment: date, doctor_id: doctor_id, status: :approved).pluck(:seance_id)
-
-    # Return seances that are not booked
-    all_seances.where.not(id: booked_seances)
   end
 end
