@@ -55,7 +55,12 @@ Rails.application.routes.draw do
           get 'doctor_stats/:doctor_id', to: 'doctors#getDoctorStatistique'
           patch 'doctors/:id/upgrade_plan', to: 'doctors#upgrade_doctor_plan'
           get 'get_doctors_by_locations/:location', to: 'doctors#get_doctors_by_locations'
+          get 'location_details', to: 'locations#details'
+          patch 'updatedoctorimage/:id', to: 'doctors#updatedoctorimage'
+          patch 'updatedoctor/:id', to: 'doctors#updatedoctor'
+          patch 'updatepassword/:id', to: 'doctors#updatepassword'
 
+          
         end
       end
 

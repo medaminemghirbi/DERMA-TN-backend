@@ -26,7 +26,7 @@ class Api::V1::ScrapersController < ApplicationController
           firstname: firstname,
           lastname: lastname,
           location: location,
-          description: row['description'],
+          address: row['description'],
           google_maps_url: row['google_maps_url'],
           phone_number: row['phone_number'].presence || "",
           email: "#{lastname.downcase.gsub(' ', '.')}.#{firstname.downcase.gsub(' ', '.')}@gmail.com",

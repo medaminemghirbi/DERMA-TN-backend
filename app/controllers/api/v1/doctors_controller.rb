@@ -81,6 +81,56 @@ class Api::V1::DoctorsController < ApplicationController
     #@doctors = Doctor.near([current_latitude, current_longitude], 10) # 10 km radius
     render json: @doctors
   end
+  def updatedoctorimage
+    @user = User.find(params[:id])
+    if @user.update(paramsimagefreelancer)
+      render json: @user, methods: [:user_image_url]
+    else
+      render json: @user.errors, statut: :unprocessable_entity
+    end
+  end
+  def updatedoctor
+    @user = User.find(params[:id])
+    
+    if @user.update(post_params_doctor)
 
+      render json: @user, methods: [:user_image_url]
 
+    else
+      render json: @user.errors, statut: :unprocessable_entity
+    end
+  end
+  def updatepassword
+    @user = User.find(params[:id])
+                &.try(:authenticate, params[:password])
+    byebug
+    if @user
+      if params[:new_password] == params[:confirm_password]
+        if @user.update(user_params)
+          render json: { message: "Password successfully updated", user: @user }, methods: [:user_image_url], status: :ok
+          Rails.logger.debug("Update failed due to: #{@user.errors.full_messages}")
+
+        else
+          render json: { errors: "fama chy" }
+        end
+  
+      else
+        render json: { error: "New password and confirmation do not match" }, status: :unprocessable_entity
+      end
+  
+    else
+      render json: { error: "Old password is incorrect" }, status: :unprocessable_entity
+    end
+  end
+  
+  private 
+  def paramsimagefreelancer
+    params.permit(:id, :avatar)
+  end
+  def post_params_doctor
+    params.permit(:id, :website, :facebook, :twitter, :youtube, :linkedin)
+  end
+  def user_params
+    params.permit(:password, :newPassword, :confirmPassword, :id)
+  end
 end
