@@ -16,6 +16,7 @@ Rails.application.routes.draw do
           get :confirm_email
         end
       end
+  
       namespace :api do
         namespace :v1 do
           resources :doctors do
@@ -27,7 +28,12 @@ Rails.application.routes.draw do
           resources :maladies
           resources :holidays
           resources :messages
-
+          resources :users do
+            member do
+              put 'email_notifications', to: 'users#update_email_notifications'
+              put 'system_notifications', to: 'users#update_system_notifications'
+            end
+          end  
           get 'messages/:message_id/images/:image_id', to: 'messages#download_image'
           delete 'destroy_all', to: 'messages#destroy_all'
 

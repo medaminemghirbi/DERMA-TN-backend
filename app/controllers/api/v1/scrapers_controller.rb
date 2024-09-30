@@ -22,7 +22,7 @@ class Api::V1::ScrapersController < ApplicationController
       doctor_exists = Doctor.exists?(firstname: firstname, lastname: lastname, location: location)
 
       unless doctor_exists
-        doctor = Doctor.create!(
+        doctor = User.create!(
           firstname: firstname,
           lastname: lastname,
           location: location,
@@ -33,6 +33,7 @@ class Api::V1::ScrapersController < ApplicationController
           password: "123456",
           created_at: Faker::Date.between(from: Date.parse('2025-01-01'), to: Date.parse('2025-07-01')),
           password_confirmation: "123456",
+          type: "Doctor",
           email_confirmed: [true, false].sample 
         )
 

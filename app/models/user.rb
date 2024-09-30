@@ -8,7 +8,7 @@ class User < ApplicationRecord
   include Rails.application.routes.url_helpers
 
   ## Callbacks
-  after_create :create_user_settings_for_patient
+  after_create :create_user_settings
   before_create :confirmation_token
 
   ## Validations
@@ -28,8 +28,8 @@ class User < ApplicationRecord
   end
   private
 
-  def create_user_settings_for_patient
-    create_user_setting! unless self.type != 'Patient'
+  def create_user_settings
+    create_user_setting!
   end
 
   def email_activate

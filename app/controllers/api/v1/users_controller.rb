@@ -37,6 +37,37 @@ class Api::V1::UsersController < ApplicationController
       end
     end
 
+    def update_email_notifications
+      @user = User.find(params[:id])
+      if @user.user_setting.update(is_emailable: params[:is_emailable])
+        render json: { status: 200, message: 'Email notification preference updated successfully.' }
+      else
+        render json: { status: 422, errors: @user.user_setting.errors.full_messages }, status: :unprocessable_entity
+      end
+    end
+  
+    # Update system notification preference
+    def update_system_notifications
+      @user = User.find(params[:id])
+
+      if @user.user_setting.update(is_notifiable: params[:is_notifiable])
+        render json: { status: 200, message: 'System notification preference updated successfully.' }
+      else
+        render json: { status: 422, errors: @user.user_setting.errors.full_messages }, status: :unprocessable_entity
+      end
+    end
+  
+    # Update SMS notification preference
+    def update_sms_notifications
+      @user = User.find(params[:id])
+
+      if @user.user_setting.update(is_smsable: params[:is_smsable])
+        render json: { status: 200, message: 'SMS notification preference updated successfully.' }
+      else
+        render json: { status: 422, errors: @user.user_setting.errors.full_messages }, status: :unprocessable_entity
+      end
+    end
+
     #************************* les fonctions private de classe ***********************#
       private
 
