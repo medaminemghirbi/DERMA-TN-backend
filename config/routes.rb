@@ -28,6 +28,7 @@ Rails.application.routes.draw do
           resources :maladies
           resources :holidays
           resources :messages
+          resources :notifications, only: [:create, :index]
           resources :users do
             member do
               put 'email_notifications', to: 'users#update_email_notifications'
