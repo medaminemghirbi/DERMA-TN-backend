@@ -34,8 +34,8 @@ include CurrentUserConcern
     def logout
         token = request.headers['Authorization']&.split(' ')&.last
         if token.present?
-          # Remove the token from the blacklist cache
-          Rails.cache.delete("blacklist/#{token}")
+            # Remove the token from the blacklist cache
+            Rails.cache.delete("blacklist/#{token}")
         end
 
         reset_session

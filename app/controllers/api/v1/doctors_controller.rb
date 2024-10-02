@@ -1,7 +1,7 @@
 require 'yaml'
 
 class Api::V1::DoctorsController < ApplicationController
-  before_action :authorize_request
+  before_action :authorize_request, except: [:unique_locations]
   def getDoctorStatistique
     @consultations = Consultation.current.where(doctor_id: params[:doctor_id]).count
     @blogs = Blog.current.where(doctor_id: params[:doctor_id]).count
@@ -13,10 +13,14 @@ class Api::V1::DoctorsController < ApplicationController
       ia_usage: total_ia_usage_count
     }
   end
-    def  index
-      doctors = Doctor.current.all
-      render json: doctors.as_json(methods: [:user_image_url])
-    end
+  def index
+    doctors = Doctor.current.all
+  
+    render json: doctors.as_json(
+      methods: [:user_image_url]
+    )
+  end
+  
 
   def show
     @Doctor = Doctor.find(params[:id])
@@ -103,7 +107,6 @@ class Api::V1::DoctorsController < ApplicationController
   def updatepassword
     @user = User.find(params[:id])
                 &.try(:authenticate, params[:password])
-    byebug
     if @user
       if params[:new_password] == params[:confirm_password]
         if @user.update(user_params)

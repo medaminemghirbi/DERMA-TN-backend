@@ -105,17 +105,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_09_18_134557) do
     t.uuid "sender_id"
   end
 
-  create_table "user_settings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.boolean "is_emailable", default: true
-    t.boolean "is_notifiable", default: true
-    t.boolean "is_smsable", default: true
-    t.boolean "is_archived", default: false
-    t.uuid "user_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["user_id"], name: "index_user_settings_on_user_id"
-  end
-
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "email"
     t.string "password_digest"
@@ -146,6 +135,9 @@ ActiveRecord::Schema[7.0].define(version: 2024_09_18_134557) do
     t.string "medical_history"
     t.integer "plan", default: 0
     t.integer "custom_limit", default: 0
+    t.boolean "is_emailable", default: true
+    t.boolean "is_notifiable", default: true
+    t.boolean "is_smsable", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -155,5 +147,4 @@ ActiveRecord::Schema[7.0].define(version: 2024_09_18_134557) do
   add_foreign_key "consultations", "users", column: "doctor_id"
   add_foreign_key "consultations", "users", column: "patient_id"
   add_foreign_key "doctor_usages", "users", column: "doctor_id"
-  add_foreign_key "user_settings", "users"
 end

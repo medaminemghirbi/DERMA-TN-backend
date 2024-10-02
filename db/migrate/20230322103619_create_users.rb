@@ -37,6 +37,10 @@ class CreateUsers < ActiveRecord::Migration[7.0]
       t.integer :plan, default: 0
       t.integer :custom_limit, default: 0
 
+      #Add User Settings to avoid tables
+      t.boolean :is_emailable, default: true
+      t.boolean :is_notifiable, default: true
+      t.boolean :is_smsable, default: true
       t.timestamps
 
     end

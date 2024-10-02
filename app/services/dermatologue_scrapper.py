@@ -27,6 +27,7 @@ gouvernements = ['ben-arous', 'bizerte', 'beja', 'gabes', 'gafsa', 'ariana',
                  'monastir', 'nabeul', 'sfax', 'sidi-bou-zid', 'siliana',
                  'sousse', 'tataouine', 'tozeur', 'tunis', 'zaghouan']
 
+specialities = ['dermatologue', 'cardiologue', 'pediatre', 'medecin-generaliste']
 # Initialize an empty list to store doctor data
 doctors_data = []
 
@@ -60,7 +61,9 @@ for gouvernement in gouvernements:
 
             doctor_info = {
                 'name': name,
-                'location': gouvernement if gouvernement else "Unknown"
+                'location': gouvernement if gouvernement else "Unknown",
+                'speciality': 'dermatologue',
+                'gouvernement':gouvernement
             }
 
             # Navigate to the doctor's profile page and get additional information
@@ -101,7 +104,7 @@ driver.quit()  # Close the browser
 df = pd.DataFrame(doctors_data)
 
 # Path to save the CSV file
-csv_file_path = os.path.join(os.path.dirname(__file__), 'doctors_data.csv')
+csv_file_path = os.path.join(os.path.dirname(__file__), 'dermatologue_doctors.csv')
 
 # Check if the file exists and delete it if necessary
 if os.path.exists(csv_file_path):

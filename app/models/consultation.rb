@@ -2,6 +2,7 @@ class Consultation < ApplicationRecord
   ## Scopes
   enum status: { pending: 0, approved: 1, rejected: 2 }
   scope :current, -> { where(is_archived: false) }
+  after_create_commit { broadcast_notification }
 
   ## Includes
 
@@ -37,5 +38,18 @@ class Consultation < ApplicationRecord
     if Consultation.where(appointment: appointment, status: :approved, doctor_id: doctor_id).exists?
       errors.add(:appointment, "is already booked for an approved consultation at this time.")
     end
+  end
+
+
+  def broadcast_notification
+    ActionCable.server.broadcast('ConsultationChannel', {
+      id: self.id,
+      appointment: self.appointment,
+      status: self.status,
+      doctor_id: self.doctor_id,
+      patient_id: self.patient_id,
+      refus_reason: self.refus_reason,
+
+    })
   end
 end

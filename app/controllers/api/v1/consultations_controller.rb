@@ -26,7 +26,7 @@ class Api::V1::ConsultationsController < ApplicationController
     end
 
     if @consultation.save
-      # DemandeMailer.send_mail_demande(@consultation.user, @consultation).deliver
+      handle_notifications(@consultation.patient_id, @consultation.doctor_id, @consultation)
       render json: @consultation, status: :created
     else
       render json: @consultation.errors, status: :unprocessable_entity
@@ -39,7 +39,7 @@ class Api::V1::ConsultationsController < ApplicationController
 
     if valid_status?(consultation_params[:status])
       if @consultation.update(consultation_params)
-        # handle_notifications(@patient, @consultation)
+        handle_notifications(@patient, @consultation)
         render json: @consultation, include: [:user]
       else
         render json: @consultation.errors, status: :unprocessable_entity
@@ -159,23 +159,24 @@ class Api::V1::ConsultationsController < ApplicationController
     Consultation.where(appointment: @consultation.appointment, status: :approved).exists?
   end
 
-  def handle_notifications(patient, consultation)
-    if patient.user_setting.is_emailable
-      DemandeMailer.send_mail_demande(patient, consultation).deliver
-    end
+  def handle_notifications(patient_id, doctor_id, consultation)
+    @doctor = User.find(doctor_id)
+    @patient = User.find(patient_id)
 
-    if patient.user_setting.is_smsable && patient.mobile.present?
-      to_phone_number = "+216#{patient.mobile}"
-      body = "Your consultation status has been updated."
-      sms_service = Twilio::SmsService.new(
-        body: body,
-        to_phone_number: to_phone_number
-      )
-      sms_service.call
+    if @doctor.is_emailable
+      DemandeMailer.send_mail_demande(@doctor, consultation).deliver
     end
-
-    if patient.user_setting.is_notifiable
-      ActionCable.server.broadcast "consultation_#{consultation.id}", {
+    if @patient.is_emailable
+      DemandeMailer.send_mail_demande(@patient, consultation).deliver
+    end
+    if @doctor.is_notifiable
+      ActionCable.server.broadcast "ConsultationChannel", {
+        consultation: consultation,
+        status: consultation.status
+      }
+    end
+    if @patient.is_notifiable
+      ActionCable.server.broadcast "ConsultationChannel", {
         consultation: consultation,
         status: consultation.status
       }

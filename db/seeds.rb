@@ -3,7 +3,12 @@ require 'open-uri'
 require 'yaml'
 require 'csv'
 puts "seeding"
-admin = Admin.create(  email: "Admin@example.com", firstname: "Admin", lastname:"Admin", password: "123456", password_confirmation: "123456", email_confirmed: true)
+
+  ###########################Seeding Admin ##################################
+  ##################################################################################
+  ##################################################################################
+
+admin = Admin.create(  email: "Admin@example.com", firstname: "Admin", lastname:"Admin", password: "123456",password_confirmation: "123456", email_confirmed: true)
 image_url = "https://thumbs.dreamstime.com/b/admin-reliure-de-bureau-sur-le-bureau-en-bois-sur-la-table-crayon-color%C3%A9-79046621.jpg"
 image_file = URI.open(image_url)
 
@@ -13,7 +18,10 @@ admin.avatar.attach(
   filename: "admin_avatar.jpg",
   content_type: "image/jpeg"
 )
-  
+    ###########################Seeding Patients ##################################
+  ##################################################################################
+  ##################################################################################
+
 10.times do
     patient = Patient.create(
       email: Faker::Internet.unique.email,
