@@ -1,7 +1,7 @@
 # app/services/run_scraper.rb
 class RunScraper
   def self.call
-    script_path = Rails.root.join('app', 'services', 'scrapper.py')
+    script_path = Rails.root.join('app', 'services', 'dermatologue_scrapper.py')
     
     # Command to run the Python script
     command = "python3 #{script_path}"

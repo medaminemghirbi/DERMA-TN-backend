@@ -1,5 +1,6 @@
 class Api::V1::ConsultationsController < ApplicationController
   before_action :set_consultation, only: [:show, :update, :destroy]
+
   # GET /consultations
   def index
     render json: Consultation.current
@@ -13,36 +14,29 @@ class Api::V1::ConsultationsController < ApplicationController
   # POST /consultations
   def create
     @consultation = Consultation.new(consultation_params)
-    if Holiday.where(holiday_date: @consultation.appointment).exists?
+
+    if holiday_exists?
       render json: { error: "You cannot add a consultation on a holiday." }, status: :unprocessable_entity
       return
     end
-    if Consultation.where(appointment: @consultation.appointment, seance: @consultation.seance).where(status: :approved).exists?
-      render json: { error: "date not available" }, status: :unprocessable_entity
+
+    if consultation_exists?
+      render json: { error: "You already created a consultation request on this date." }, status: :unprocessable_entity
       return
     end
-    if Consultation.where(
-        appointment: @consultation.appointment,
-        seance: @consultation.seance,
-        doctor_id: @consultation.doctor_id,
-        patient_id: @consultation.patient_id,
-        status: @consultation.status
-      ).exists?
-      render json: { error: "you already created a consultation demande on this date" }, status: :unprocessable_entity
-      return
-    end
+
     if @consultation.save
-      #DemandeMailer.send_mail_demande(@consultation.user, @consultation).deliver
+      handle_notifications(@consultation.patient_id, @consultation.doctor_id, @consultation)
       render json: @consultation, status: :created
     else
       render json: @consultation.errors, status: :unprocessable_entity
     end
   end
-  
+
+  # PATCH/PUT /consultations/1
   def update
-    @consultation = Consultation.find(params[:id])
     @patient = User.find(@consultation.patient_id)
-    
+
     if valid_status?(consultation_params[:status])
       if @consultation.update(consultation_params)
         handle_notifications(@patient, @consultation)
@@ -57,113 +51,151 @@ class Api::V1::ConsultationsController < ApplicationController
     Rails.logger.error("Failed to update consultation: #{e.message}")
     render json: { error: e.message }, status: :internal_server_error
   end
-  
-  
 
   # DELETE /consultations/1
   def destroy
-    if(@consultation[:status] =="pending")
+    if @consultation.status == "pending"
       @consultation.update(is_archived: true)
     else
-      render json: { error: "You Can't delete it." }, status: :unprocessable_entity
-      return
+      render json: { error: "You can't delete it." }, status: :unprocessable_entity
     end
   end
 
-  # render consultations by Doctors
-  def doctor_consultations
+  # GET /consultations/doctor_appointments
+  def doctor_appointments
     @consultations = Consultation.current.where(doctor_id: params[:doctor_id])
-    render json: @consultations, 
-      include: {
+    render json: @consultations, include: {
+      doctor: { methods: [:user_image_url] },
+      patient: { methods: [:user_image_url] }
+    }
+  end
+
+  # GET /consultations/doctor_consultations
+  def doctor_consultations
+    @consultations = Consultation.current.where(doctor_id: params[:doctor_id], status: 1)
+    rendered_consultations = @consultations.map do |consultation|
+      consultation_hash = consultation.as_json(include: {
         doctor: { methods: [:user_image_url] },
         patient: { methods: [:user_image_url] }
-      }
+      })
+
+      consultation_hash.merge!(
+        appointment: consultation.appointment.in_time_zone('Africa/Tunis').strftime('%Y-%m-%d %H:%M:%S')
+      )
+
+      consultation_hash
+    end
+
+    render json: rendered_consultations
   end
 
-  
+  # GET /consultations/doctor_consultations_today
   def doctor_consultations_today
     today = Date.current
-  
-    @consultations = Consultation.current
-                                  .where(doctor_id: params[:doctor_id], appointment: today)
-    
-    # Sort the consultations in Ruby
-    @consultations = @consultations.sort_by do |consultation|
-      seance = consultation.seance
-      # Convert seance to a sortable format
-      if seance.include?(":")
-        # Handle time format "HH:MM"
-        hours, minutes = seance.split(":").map(&:to_i)
-        hours * 60 + minutes
-      else
-        # Handle numeric format
-        seance.to_i * 60
-      end
+
+    @consultations = Consultation.where(
+      doctor_id: params[:doctor_id],
+      appointment: today.beginning_of_day..today.end_of_day,
+      status: 1
+    ).sort_by(&:appointment)
+
+    render json: @consultations.as_json(include: {
+      patient: { methods: [:user_image_url] }
+    }).map do |consultation|
+      consultation.merge(
+        appointment: consultation['appointment'].strftime('%Y-%m-%d %H:%M:%S')
+      )
     end
-  
-    render json: @consultations, 
-      include: {
-        patient: { methods: [:user_image_url] }
-      }
   end
-  
-  def available_seances
-    date = params[:date]
+
+  # GET /consultations/available_time_slots
+  def available_time_slots
     doctor_id = params[:doctor_id]
+    date_str = params[:date]
+    date = Date.parse(date_str)
+    start_of_day = date.beginning_of_day.in_time_zone('Africa/Tunis')
+    end_of_day = date.end_of_day.in_time_zone('Africa/Tunis')
 
-    # Ensure both parameters are provided
-    if date.present? && doctor_id.present?
-      available_seances = Consultation.available_seances_for_date(date, doctor_id)
+    approved_consultations = Consultation.where(
+      doctor_id: doctor_id,
+      status: 1,
+      appointment: start_of_day..end_of_day
+    )
 
-      render json: {
-        available_seances: available_seances.map do |seance|
-          {
-            id: seance.id,
-            start_time: seance.start_time.strftime('%H:%M'), # Format start_at as HH:MM
-            end_time: seance.end_time.strftime('%H:%M')    # Format end_at as HH:MM
-          }
-        end
-      }
-    else
-      render json: { status: 'error', message: 'Date and doctor_id are required' }, status: :bad_request
+    occupied_slots = approved_consultations.pluck(:appointment).map do |appointment|
+      appointment.in_time_zone('Africa/Tunis').strftime("%H:%M")
     end
-  end
 
+    available_slots = TIME_SLOTS.reject { |slot| occupied_slots.include?(slot[:time]) }
+
+    render json: available_slots
+  end
 
   private
-    def set_consultation
-      @consultation = Consultation.find(params[:id])
-    end
 
-    def consultation_params
-      params.permit(:appointment, :status, :refus_reason, :is_archived, :doctor_id, :patient_id, :seance)
-    end
-    
+  def set_consultation
+    @consultation = Consultation.find(params[:id])
+  end
 
-    def valid_status?(status)
-      ["pending", "rejected", "approved"].include?(status)
+  def consultation_params
+    params.permit(:appointment, :status, :refus_reason, :is_archived, :doctor_id, :patient_id, :id)
+  end
+
+  def valid_status?(status)
+    %w[pending rejected approved].include?(status)
+  end
+
+  def holiday_exists?
+    Holiday.where(holiday_date: @consultation.appointment).exists?
+  end
+
+  def consultation_exists?
+    Consultation.where(
+      appointment: @consultation.appointment,
+      doctor_id: @consultation.doctor_id,
+      patient_id: @consultation.patient_id,
+      status: @consultation.status
+    ).exists? || 
+    Consultation.where(appointment: @consultation.appointment, status: :approved).exists?
+  end
+
+  def handle_notifications(patient_id, doctor_id, consultation)
+    @doctor = User.find(doctor_id)
+    @patient = User.find(patient_id)
+
+    if @doctor.is_emailable
+      DemandeMailer.send_mail_demande(@doctor, consultation).deliver
     end
-    
-    def handle_notifications(patient, consultation)
-      if patient.user_setting.is_emailable
-        DemandeMailer.send_mail_demande(patient, consultation).deliver
-      end
-    
-      if patient.user_setting.is_smsable && patient.mobile.present?
-        to_phone_number = "+216#{patient.mobile}"
-        body = "Your consultation status has been updated."
-        sms_service = Twilio::SmsService.new(
-          body: body,
-          to_phone_number: to_phone_number
-        )
-        sms_service.call
-      end
-    
-      if patient.user_setting.is_notifiable
-        ActionCable.server.broadcast "consultation_#{consultation.id}", {
-          consultation: consultation,
-          status: consultation.status
-        }
-      end
+    if @patient.is_emailable
+      DemandeMailer.send_mail_demande(@patient, consultation).deliver
     end
+    if @doctor.is_notifiable
+      ActionCable.server.broadcast "ConsultationChannel", {
+        consultation: consultation,
+        status: consultation.status
+      }
+    end
+    if @patient.is_notifiable
+      ActionCable.server.broadcast "ConsultationChannel", {
+        consultation: consultation,
+        status: consultation.status
+      }
+    end
+  end
+
+  TIME_SLOTS = [
+    { time: "09:00" },
+    { time: "09:30" },
+    { time: "10:00" },
+    { time: "10:30" },
+    { time: "11:00" },
+    { time: "11:30" },
+    { time: "12:00" },
+    { time: "13:30" },
+    { time: "14:00" },
+    { time: "14:30" },
+    { time: "15:00" },
+    { time: "15:30" },
+    { time: "16:00" }
+  ]
 end

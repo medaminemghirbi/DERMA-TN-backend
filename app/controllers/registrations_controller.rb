@@ -10,7 +10,7 @@ class RegistrationsController < ApplicationController
   end
 
   def create
-    user_class = case params[:type]
+    user_class = case params[:registration][:type]
                   when "Admin" then User
                   when "Doctor" then Doctor
                   else Patient

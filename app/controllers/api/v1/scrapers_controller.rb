@@ -4,10 +4,9 @@ require 'csv'
 require 'open-uri'
 class Api::V1::ScrapersController < ApplicationController
   def run
-    csv_file_path = Rails.root.join('app/services/doctors_data.csv')
+    csv_file_path = Rails.root.join("app/services/dermatologue_doctors.csv")
 
-    last_run_file = Rails.root.join('app/services/last_scraper_run.json')
-
+    last_run_file = Rails.root.join("app/services/last_scraper_run.json")
     # Check if the CSV file exists
     unless File.exist?(csv_file_path)
       RunScraper.call
@@ -22,18 +21,19 @@ class Api::V1::ScrapersController < ApplicationController
       doctor_exists = Doctor.exists?(firstname: firstname, lastname: lastname, location: location)
 
       unless doctor_exists
-        doctor = Doctor.create!(
+        doctor = User.create!(
           firstname: firstname,
           lastname: lastname,
           location: location,
-          description: row['description'],
+          address: row['description'],
           google_maps_url: row['google_maps_url'],
           phone_number: row['phone_number'].presence || "",
           email: "#{lastname.downcase.gsub(' ', '.')}.#{firstname.downcase.gsub(' ', '.')}@gmail.com",
           password: "123456",
           created_at: Faker::Date.between(from: Date.parse('2025-01-01'), to: Date.parse('2025-07-01')),
           password_confirmation: "123456",
-          email_confirmed: [true, false].sample 
+          type: "Doctor",
+          email_confirmed: true
         )
 
         # Download and attach the avatar if present

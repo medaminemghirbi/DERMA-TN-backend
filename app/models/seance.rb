@@ -1,2 +1,0 @@
-class Seance < ApplicationRecord
-end

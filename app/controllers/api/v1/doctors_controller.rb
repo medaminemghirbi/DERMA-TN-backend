@@ -1,11 +1,26 @@
 require 'yaml'
 
 class Api::V1::DoctorsController < ApplicationController
-  before_action :authorize_request
-    def  index
-      doctors = Doctor.current.all
-      render json: doctors.as_json(methods: [:user_image_url])
-    end
+  before_action :authorize_request, except: [:unique_locations]
+  def getDoctorStatistique
+    @consultations = Consultation.current.where(doctor_id: params[:doctor_id]).count
+    @blogs = Blog.current.where(doctor_id: params[:doctor_id]).count
+    @ia_usages =  DoctorUsage.current.where(doctor_id: params[:doctor_id])
+    total_ia_usage_count = @ia_usages.sum(:count)
+    render json: {
+      consultation: @consultations,
+      blogs: @blogs,
+      ia_usage: total_ia_usage_count
+    }
+  end
+  def index
+    doctors = Doctor.current.all
+  
+    render json: doctors.as_json(
+      methods: [:user_image_url]
+    )
+  end
+  
 
   def show
     @Doctor = Doctor.find(params[:id])
@@ -70,5 +85,55 @@ class Api::V1::DoctorsController < ApplicationController
     #@doctors = Doctor.near([current_latitude, current_longitude], 10) # 10 km radius
     render json: @doctors
   end
+  def updatedoctorimage
+    @user = User.find(params[:id])
+    if @user.update(paramsimagefreelancer)
+      render json: @user, methods: [:user_image_url]
+    else
+      render json: @user.errors, statut: :unprocessable_entity
+    end
+  end
+  def updatedoctor
+    @user = User.find(params[:id])
+    
+    if @user.update(post_params_doctor)
 
+      render json: @user, methods: [:user_image_url]
+
+    else
+      render json: @user.errors, statut: :unprocessable_entity
+    end
+  end
+  def updatepassword
+    @user = User.find(params[:id])
+                &.try(:authenticate, params[:password])
+    if @user
+      if params[:new_password] == params[:confirm_password]
+        if @user.update(user_params)
+          render json: { message: "Password successfully updated", user: @user }, methods: [:user_image_url], status: :ok
+          Rails.logger.debug("Update failed due to: #{@user.errors.full_messages}")
+
+        else
+          render json: { errors: "fama chy" }
+        end
+  
+      else
+        render json: { error: "New password and confirmation do not match" }, status: :unprocessable_entity
+      end
+  
+    else
+      render json: { error: "Old password is incorrect" }, status: :unprocessable_entity
+    end
+  end
+  
+  private 
+  def paramsimagefreelancer
+    params.permit(:id, :avatar)
+  end
+  def post_params_doctor
+    params.permit(:id, :website, :facebook, :twitter, :youtube, :linkedin)
+  end
+  def user_params
+    params.permit(:password, :newPassword, :confirmPassword, :id)
+  end
 end
