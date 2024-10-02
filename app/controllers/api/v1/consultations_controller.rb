@@ -39,7 +39,7 @@ class Api::V1::ConsultationsController < ApplicationController
 
     if valid_status?(consultation_params[:status])
       if @consultation.update(consultation_params)
-        handle_notifications(@patient, @consultation)
+        handle_notifications(@consultation.patient_id, @consultation.doctor_id, @consultation)
         render json: @consultation, include: [:user]
       else
         render json: @consultation.errors, status: :unprocessable_entity
