@@ -29,7 +29,6 @@ admin.avatar.attach(
       lastname: Faker::Name.last_name,
       password: "123456",
       password_confirmation: "123456",
-      phone_number: rand(1_000_000..99_999_999).to_s.rjust(8, '0'),
 
       email_confirmed: true
     )

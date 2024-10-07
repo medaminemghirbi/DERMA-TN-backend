@@ -7,6 +7,7 @@ class Doctor < User
 
   has_one_attached :avatar
   has_one :doctor_usage
+  has_many :documents
 
   geocoded_by :address
   ## Callbacks

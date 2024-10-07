@@ -30,6 +30,7 @@ Rails.application.routes.draw do
           resources :messages
           resources :notifications, only: [:create, :index]
           resources :phone_numbers
+          resources :documents
 
           resources :users do
             member do

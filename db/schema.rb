@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_10_07_100836) do
+ActiveRecord::Schema[7.0].define(version: 2024_10_07_151014) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -70,6 +70,14 @@ ActiveRecord::Schema[7.0].define(version: 2024_10_07_100836) do
     t.uuid "doctor_id", null: false
     t.date "date", null: false
     t.integer "count", default: 0
+    t.boolean "is_archived", default: false
+  end
+
+  create_table "documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "title"
+    t.uuid "doctor_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.boolean "is_archived", default: false
   end
 
@@ -165,5 +173,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_10_07_100836) do
   add_foreign_key "consultations", "users", column: "doctor_id"
   add_foreign_key "consultations", "users", column: "patient_id"
   add_foreign_key "doctor_usages", "users", column: "doctor_id"
+  add_foreign_key "documents", "users", column: "doctor_id"
   add_foreign_key "phone_numbers", "users", column: "doctor_id"
 end
