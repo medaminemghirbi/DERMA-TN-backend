@@ -15,6 +15,11 @@ class Api::V1::ConsultationsController < ApplicationController
   def create
     @consultation = Consultation.new(consultation_params)
 
+    if check_request_date?
+      render json: { error: "You cannot add a request date infeieur at today." }, status: :unprocessable_entity
+      return
+    end
+
     if holiday_exists?
       render json: { error: "You cannot add a consultation on a holiday." }, status: :unprocessable_entity
       return
@@ -132,6 +137,14 @@ class Api::V1::ConsultationsController < ApplicationController
   end
 
   private
+
+  def check_request_date?
+    request_date = params[:appointment]
+    if request_date.present? && request_date.to_date < Date.today
+      return true
+    end
+    return false
+  end
 
   def set_consultation
     @consultation = Consultation.find(params[:id])

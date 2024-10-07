@@ -19,6 +19,21 @@ include CurrentUserConcern
             render json: { status: 401 }
         end
     end
+    def resend_confirm_link
+        @user = User.find_by(email: params['user']['email'])&.try(:authenticate, params['user']['password'])
+        if @user
+            if @user.email_confirmed == false
+                @user.update(confirm_token: SecureRandom.urlsafe_base64.to_s) if @user.confirm_token.blank?
+                UserMailer.registration_confirmation(@user).deliver_now
+                render json: { message: 'A new confirmation email has been sent to your email address.' }, status: :ok
+            else
+                render json: { error: 'Your email is already confirmed.' }, status: :unprocessable_entity
+            end
+        else
+            render json: { error: 'Invalid email or password.' }, status: :unauthorized
+        end
+    end
+
     def logged_in
         if @current_user
             render json: {

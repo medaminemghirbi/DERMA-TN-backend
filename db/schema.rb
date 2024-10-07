@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_10_02_144052) do
+ActiveRecord::Schema[7.0].define(version: 2024_10_07_100836) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -114,6 +114,15 @@ ActiveRecord::Schema[7.0].define(version: 2024_10_02_144052) do
     t.index ["consultation_id"], name: "index_notifications_on_consultation_id"
   end
 
+  create_table "phone_numbers", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "doctor_id", null: false
+    t.string "number", null: false
+    t.string "phone_type", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "is_archived", default: false
+  end
+
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "email"
     t.string "password_digest"
@@ -124,9 +133,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_10_02_144052) do
     t.string "confirm_token"
     t.string "password_reset_token"
     t.datetime "password_reset_sent_at"
-    t.bigint "phone_number"
     t.date "birthday"
-    t.string "gender"
+    t.integer "gender"
     t.integer "civil_status"
     t.boolean "is_archived", default: false
     t.string "type"
@@ -136,6 +144,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_10_02_144052) do
     t.float "longitude"
     t.string "google_maps_url"
     t.string "description"
+    t.string "code_doc"
     t.string "website"
     t.string "twitter"
     t.string "youtube"
@@ -156,4 +165,5 @@ ActiveRecord::Schema[7.0].define(version: 2024_10_02_144052) do
   add_foreign_key "consultations", "users", column: "doctor_id"
   add_foreign_key "consultations", "users", column: "patient_id"
   add_foreign_key "doctor_usages", "users", column: "doctor_id"
+  add_foreign_key "phone_numbers", "users", column: "doctor_id"
 end

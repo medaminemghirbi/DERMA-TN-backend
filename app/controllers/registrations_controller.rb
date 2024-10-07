@@ -24,8 +24,9 @@ class RegistrationsController < ApplicationController
       render json: { status: 500, errors: user.errors.full_messages }
     end
   end
+  
   private
     def user_params
-      params.require(:registration).permit(:lastname, :firstname, :email, :password, :password_confirmation, :type)
+      params.require(:registration).permit(:lastname, :firstname, :email, :password, :password_confirmation, :type, :location)
     end
 end

@@ -1,5 +1,7 @@
 class User < ApplicationRecord
   self.table_name = "users"
+  enum gender: [:male, :female]
+  enum civil_status: [:Mr, :Mrs, :Mme, :other]
 
   ##scopes
   scope :current, -> { where(is_archived: false) }
@@ -9,6 +11,7 @@ class User < ApplicationRecord
 
   ## Callbacks
   before_create :confirmation_token
+  before_save :generate_code_doc
 
   ## Validations
   has_secure_password
@@ -18,6 +21,7 @@ class User < ApplicationRecord
 
   ## Associations
   has_one_attached :avatar, dependent: :destroy
+  has_many :phone_numbers, dependent: :destroy
   has_many :sent_messages, class_name: 'Message'
   has_many :received_messages, class_name: 'Message'
   def user_image_url
@@ -50,6 +54,15 @@ class User < ApplicationRecord
       self[column] = SecureRandom.urlsafe_base64
     end while User.exists?(column => self[column])
   end
+  def generate_code_doc
+    current_year = Time.now.year
+    # Get the first two characters of the first and last name
+    first_two_firstname = self.firstname[0,2].capitalize
+    first_two_lastname = self.lastname[0,2].capitalize
 
+    # Generate the new code
+    self.code_doc = "Dr-#{first_two_firstname}-#{first_two_lastname}-#{current_year}"
+  end
+  
 
 end

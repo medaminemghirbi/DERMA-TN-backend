@@ -29,6 +29,8 @@ Rails.application.routes.draw do
           resources :holidays
           resources :messages
           resources :notifications, only: [:create, :index]
+          resources :phone_numbers
+
           resources :users do
             member do
               put 'email_notifications', to: 'users#update_email_notifications'
@@ -66,6 +68,7 @@ Rails.application.routes.draw do
           patch 'updatedoctorimage/:id', to: 'doctors#updatedoctorimage'
           patch 'updatedoctor/:id', to: 'doctors#updatedoctor'
           patch 'updatepassword/:id', to: 'doctors#updatepassword'
+          patch 'update_uesr_informations/:id', to: 'users#update_uesr_informations'
 
           
         end

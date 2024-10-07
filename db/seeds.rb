@@ -168,7 +168,30 @@ YAML.load_file(Rails.root.join('db', 'diseases.yml')).each do |disease_data|
   ##################################################################################
   ##################################################################################
 
+  puts "Seeding holidays 2024..."
+    # Set up the API endpoint URL
+    url = URI("https://api.api-ninjas.com/v1/holidays?country=TN&year=2024&type=PUBLIC_HOLIDAY")
 
+    # Set up the HTTP request
+    request = Net::HTTP::Get.new(url)
+    request['x-API-KEY'] = 'mYCPF5Bd6yRjMmCMSGkQnw==6aK6gP1eU5EjzpJw'
+
+    # Make the HTTP request and parse the response
+    response = Net::HTTP.start(url.hostname, url.port, use_ssl: true) do |http|
+      http.request(request)
+    end
+
+    # Parse the JSON response
+    holidays_data = JSON.parse(response.body)
+    # Seed the holidays table
+    holidays_data.each do |holiday|
+      Holiday.create!(
+        holiday_name: holiday['name'],
+        holiday_date: holiday['date'],
+        is_archived: false
+      )
+    end
+    puts "Seeding completed! Created #{Holiday.count} holidays."
 
   puts "Seeding holidays 2025..."
     # Set up the API endpoint URL
