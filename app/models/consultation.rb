@@ -1,6 +1,6 @@
 class Consultation < ApplicationRecord
   ## Scopes
-  enum status: { pending: 0, approved: 1, rejected: 2 }
+  enum status: { pending: 0, approved: 1, rejected: 2, canceled: 3 }
   scope :current, -> { where(is_archived: false) }
   after_create_commit { broadcast_notification }
 

@@ -1,6 +1,6 @@
 class StaticController <ApplicationController
     def home
-        render json: { status: "It's working" }
+      render file: Rails.root.join('public', 'index.html')
     end
 
     def static
@@ -13,19 +13,19 @@ class StaticController <ApplicationController
         render json: {
           data: [@employee, @stagiaire, @freelancer, @admin, @offre]
         }
-      end
+    end
 
-      def static_home
-        @admins = User.all.select { |m| m.role == 'admin' }.count
-        @candidates = User.all.select { |m| m.role != 'superadmin'&& m.role != 'admin'    }.count
-        @domains = Domain.all.count
-        @offers = Offre.all.count
-        render json: {
-            admin: @admins,
-            offer: @offers,
-            candidates: @candidates,
-            domains: @domains
-        }
-      end
+    def static_home
+      @admins = User.all.select { |m| m.role == 'admin' }.count
+      @candidates = User.all.select { |m| m.role != 'superadmin'&& m.role != 'admin'    }.count
+      @domains = Domain.all.count
+      @offers = Offre.all.count
+      render json: {
+          admin: @admins,
+          offer: @offers,
+          candidates: @candidates,
+          domains: @domains
+      }
+    end
 
 end

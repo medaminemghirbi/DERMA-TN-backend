@@ -161,7 +161,7 @@ class Api::V1::ConsultationsController < ApplicationController
   end
 
   def valid_status?(status)
-    %w[pending rejected approved].include?(status)
+    %w[pending rejected approved canceled].include?(status)
   end
 
   def holiday_exists?

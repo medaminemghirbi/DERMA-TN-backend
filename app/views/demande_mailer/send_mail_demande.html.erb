@@ -20,8 +20,12 @@
           Congratulations! Your last consultation demande  has been accepted. Please check your account.
           <p>Thanks for contacting us and have a great day!</p>
         <% elsif @demande.status == "rejected" %>
+        
           We regret to inform you that your consultation request has been refused. check your account for more details
           <p>Thanks for contacting us and have a great day!</p>
+        <% elsif @demande.status == "canceled" %>
+           Your last consultation demande  has been accanceledcepted. Please check your account.
+          <p>Thanks for time a great day!</p
         <% else %>
           Invalid status for the request.
         <% end %>
