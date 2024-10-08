@@ -29,7 +29,7 @@ class CreateUsers < ActiveRecord::Migration[7.0]
       t.string :youtube
       t.string :facebook
       t.string :linkedin
-
+      t.string :phone_number
       #Add  Patient-specific fields
 
       t.string :medical_history

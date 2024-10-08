@@ -70,7 +70,10 @@ class Api::V1::ConsultationsController < ApplicationController
   def doctor_appointments
     @consultations = Consultation.current.where(doctor_id: params[:doctor_id])
     render json: @consultations, include: {
-      doctor: { methods: [:user_image_url] },
+      doctor: {
+        methods: [:user_image_url],
+        include: :phone_numbers  # Include phone_numbers here
+      },
       patient: { methods: [:user_image_url] }
     }
   end
@@ -80,7 +83,10 @@ class Api::V1::ConsultationsController < ApplicationController
     @consultations = Consultation.current.where(doctor_id: params[:doctor_id], status: 1)
     rendered_consultations = @consultations.map do |consultation|
       consultation_hash = consultation.as_json(include: {
-        doctor: { methods: [:user_image_url] },
+        doctor: {
+          methods: [:user_image_url],
+          include: :phone_numbers  # Include phone_numbers here
+        },
         patient: { methods: [:user_image_url] }
       })
 

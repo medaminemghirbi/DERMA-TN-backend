@@ -23,13 +23,16 @@ admin.avatar.attach(
   ##################################################################################
 
 10.times do
+  
+    phone_number = Faker::PhoneNumber.phone_number.sub(/\D/, '').slice(0, 8)  # Remove non-digit characters and keep first 8 digits
+
     patient = Patient.create(
       email: Faker::Internet.unique.email,
       firstname: Faker::Name.first_name,
       lastname: Faker::Name.last_name,
       password: "123456",
       password_confirmation: "123456",
-
+      phone_number: phone_number,
       email_confirmed: true
     )
     downloaded_image = URI.open(Faker::Avatar.image)

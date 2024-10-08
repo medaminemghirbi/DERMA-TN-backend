@@ -11,20 +11,54 @@ class Api::V1::DocumentsController < ApplicationController
       render json: { errors: document.errors.full_messages }, status: :unprocessable_entity
     end
   end
+
+
   def show
-    document = Document.find(params[:id])
-    if document.file.attached?
-      send_data document.file.download, filename: document.title, type: document.file.content_type, disposition: 'attachment'
-    else
-      render json: { error: 'File not found' }, status: :not_found
-    end
-  end
-  def destroy
     doctor = Doctor.find(params[:id])
 
     documents = Document.current.where(doctor_id: doctor.id).all
     # Use document_data method to include file_type and document_url
     render json: documents.map { |doc| document_data(doc) }, status: :ok, methods: [:document_url]
+  end
+
+  def destroy 
+    document = Document.find(params[:id])
+    if document.update(is_archived: true)
+      render json: { message: 'Document uploaded successfully', document: document_data(document) }, status: :created, methods: [:document_url]
+    else
+    render json: { errors: document.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
+  def download
+    doc = Document.find params[:id]
+  
+    begin
+      data = URI.open(doc.document_url)
+      send_data data.read, filename: doc.title, type: doc.file.content_type, disposition: 'attachment'
+    rescue OpenURI::HTTPError
+      render body: nil, status: :forbidden
+    end
+  end
+  
+  def delete_all_documents
+    doctor = Doctor.find(params[:id])
+    if doctor 
+      Document.where(doctor_id: doctor.id).update(is_archived: true)
+      render json: { message: 'All Documents deleted successfully'}
+    else
+    render json: { errors: doctor.errors.full_messages }, status: :unprocessable_entity
+    end
+
+  end
+
+  def update
+    doc = Document.find params[:id]
+    if doc.update(document_params)
+      render json: doc
+    else
+      render json: doc.errors, status: :unprocessable_entity
+    end
   end
 
   private

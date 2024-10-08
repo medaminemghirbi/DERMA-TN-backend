@@ -70,7 +70,10 @@ Rails.application.routes.draw do
           patch 'updatedoctor/:id', to: 'doctors#updatedoctor'
           patch 'updatepassword/:id', to: 'doctors#updatepassword'
           patch 'update_uesr_informations/:id', to: 'users#update_uesr_informations'
+          get 'download_file/:id', to: 'documents#download'
+          delete 'delete_all_documents/:id', to: 'documents#delete_all_documents'
 
+          
           
         end
       end
