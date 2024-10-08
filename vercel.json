@@ -3,13 +3,10 @@
     "builds": [
         {
             "src": "config/application.rb",
-            "use": "@vercel/ruby"
-        }
-    ],
-    "routes": [
-        {
-            "src": "/(.*)",
-            "dest": "public/index.html"
+            "use": "@vercel/ruby",
+            "config": {
+                "runtime": "ruby 3.2.2"
+            }
         }
     ]
 }
