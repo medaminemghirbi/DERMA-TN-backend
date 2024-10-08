@@ -107,6 +107,7 @@ GEM
       net-smtp
     marcel (1.0.4)
     method_source (0.8.2)
+    mini_magick (5.0.1)
     mini_mime (1.1.5)
     mini_portile2 (2.8.7)
     minitest (5.24.1)
@@ -191,6 +192,7 @@ DEPENDENCIES
   faker (~> 3.3, >= 3.3.1)
   geocoder
   jwt
+  mini_magick
   pg (~> 1.4.3)
   puma (~> 5.0)
   pycall

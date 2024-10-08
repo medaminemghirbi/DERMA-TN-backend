@@ -7,6 +7,7 @@ class Doctor < User
 
   has_one_attached :avatar
   has_one :doctor_usage
+  has_many :documents
 
   geocoded_by :address
   ## Callbacks
@@ -20,6 +21,7 @@ class Doctor < User
   has_one_attached :avatar
   has_many :blogs, dependent: :destroy
   has_many :consultations, dependent: :destroy
+  has_many :phone_numbers, dependent: :destroy
 
 
   def daily_limit

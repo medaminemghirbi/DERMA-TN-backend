@@ -4,7 +4,7 @@
     <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
   </head>
   <body>
-    <h1>Welcome to docpro.com</h1>
+    <h1>Welcome to docpro.tn</h1>
     <h1 style="color:green;"> Hi <%= @user.email %> </h1>
 
     <h4>
@@ -13,7 +13,7 @@
       <% if @user.type == "Patient" %>
         <!-- Message for patients -->
         <% if @demande.status == "pending" %>
-          You have successfully sent a consultation to Dr. <%= @demande.doctor.firstname  %> <%= @demande.doctor.lastname  %>.  request via docpro.com. <br>
+          You have successfully sent a consultation to Dr. <%= @demande.doctor.firstname  %> <%= @demande.doctor.lastname  %>.  request via docpro.tn. <br>
           Your request is in progress and will be treated as soon as possible.
           <p>Thanks for contacting us and have a great day!</p>
         <% elsif @demande.status == "approved" %>

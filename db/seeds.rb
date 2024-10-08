@@ -23,14 +23,16 @@ admin.avatar.attach(
   ##################################################################################
 
 10.times do
+  
+    phone_number = Faker::PhoneNumber.phone_number.sub(/\D/, '').slice(0, 8)  # Remove non-digit characters and keep first 8 digits
+
     patient = Patient.create(
       email: Faker::Internet.unique.email,
       firstname: Faker::Name.first_name,
       lastname: Faker::Name.last_name,
       password: "123456",
       password_confirmation: "123456",
-      phone_number: rand(1_000_000..99_999_999).to_s.rjust(8, '0'),
-
+      phone_number: phone_number,
       email_confirmed: true
     )
     downloaded_image = URI.open(Faker::Avatar.image)
@@ -168,7 +170,30 @@ YAML.load_file(Rails.root.join('db', 'diseases.yml')).each do |disease_data|
   ##################################################################################
   ##################################################################################
 
+  puts "Seeding holidays 2024..."
+    # Set up the API endpoint URL
+    url = URI("https://api.api-ninjas.com/v1/holidays?country=TN&year=2024&type=PUBLIC_HOLIDAY")
 
+    # Set up the HTTP request
+    request = Net::HTTP::Get.new(url)
+    request['x-API-KEY'] = 'mYCPF5Bd6yRjMmCMSGkQnw==6aK6gP1eU5EjzpJw'
+
+    # Make the HTTP request and parse the response
+    response = Net::HTTP.start(url.hostname, url.port, use_ssl: true) do |http|
+      http.request(request)
+    end
+
+    # Parse the JSON response
+    holidays_data = JSON.parse(response.body)
+    # Seed the holidays table
+    holidays_data.each do |holiday|
+      Holiday.create!(
+        holiday_name: holiday['name'],
+        holiday_date: holiday['date'],
+        is_archived: false
+      )
+    end
+    puts "Seeding completed! Created #{Holiday.count} holidays."
 
   puts "Seeding holidays 2025..."
     # Set up the API endpoint URL

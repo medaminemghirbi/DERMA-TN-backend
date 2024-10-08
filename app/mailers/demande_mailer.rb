@@ -1,5 +1,5 @@
 class DemandeMailer < ApplicationMailer
-  default from: 'Support@docpro.com'
+  default from: 'Support@docpro.tn'
   def send_mail_demande(user, demande)
     @user = user
     @demande = demande
