@@ -58,6 +58,7 @@ YAML.load_file(Rails.root.join('db', 'diseases.yml')).each do |disease_data|
   prevention = disease_data['prevention']
   diagnosis = disease_data['diagnosis']
   references = disease_data['references']
+  is_cancer = disease_data['is_cancer']
   image_path = Rails.root.join('app', 'assets', 'images', disease_data['image_path']).to_s
   starting_order = starting_order+1
   # Create the Disease record
@@ -71,6 +72,7 @@ YAML.load_file(Rails.root.join('db', 'diseases.yml')).each do |disease_data|
     prevention: prevention,
     diagnosis: diagnosis,
     references: references,
+    is_cancer: is_cancer,
     order: starting_order
   )
   # Attach the image

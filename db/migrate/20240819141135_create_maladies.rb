@@ -12,6 +12,7 @@ class CreateMaladies < ActiveRecord::Migration[7.0]
       t.text :references
       t.integer :order, default: 1
       t.boolean  :is_archived, :default => false
+      t.boolean :is_cancer, :default => false
 
       t.timestamps
     end
