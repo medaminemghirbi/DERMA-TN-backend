@@ -2,21 +2,14 @@
     "version": 2,
     "builds": [
         {
-            "src": "bin/*",
+            "src": "config/application.rb",
             "use": "@vercel/ruby"
-        },
-        {
-            "src": "config/*",
-            "use": "@vercel/static-build",
-            "config": {
-                "distDir": "public"
-            }
         }
     ],
     "routes": [
         {
             "src": "/(.*)",
-            "dest": "/public/index.html"
+            "dest": "public/index.html"
         }
     ]
 }
