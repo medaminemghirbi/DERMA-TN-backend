@@ -85,7 +85,7 @@ class Api::V1::ConsultationsController < ApplicationController
       consultation_hash = consultation.as_json(include: {
         doctor: {
           methods: [:user_image_url],
-          include: :phone_numbers  # Include phone_numbers here
+          include: :phone_numbers
         },
         patient: { methods: [:user_image_url] }
       })
