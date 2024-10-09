@@ -80,7 +80,6 @@ class Api::V1::ConsultationsController < ApplicationController
 
   # GET /consultations/doctor_consultations
   def doctor_consultations
-    byebug
     @consultations = Consultation.current.where(doctor_id: params[:doctor_id], status: 1)
     rendered_consultations = @consultations.map do |consultation|
       consultation_hash = consultation.as_json(include: {

@@ -111,27 +111,26 @@ end
 
 ########################### Seeding Consultations ##################################
 puts "Seeding consultations..."
-
-# Function to generate random appointment times in 30-minute intervals
-puts "Seeding consultations..."
-
-# Function to generate random appointment times in 30-minute intervals
-puts "Seeding consultations..."
-
-# Function to generate random appointment times in 30-minute intervals
 def generate_random_appointment_time
-  start_time = Time.parse("09:00")
-  end_time = Time.parse("16:00")
+  start_date = Time.now
+  end_date = start_date + 30.days
   time_slots = []
-  
-  while start_time <= end_time
-    time_slots << start_time
-    start_time += 30.minutes
+
+  # Loop through each day in the next 30 days
+  (start_date.to_date..end_date.to_date).each do |date|
+    # Generate time slots for each day between 09:00 and 16:00
+    start_time = Time.parse("09:00").change(year: date.year, month: date.month, day: date.day)
+    end_time = Time.parse("16:00").change(year: date.year, month: date.month, day: date.day)
+    
+    while start_time <= end_time
+      time_slots << start_time
+      start_time += 30.minutes
+    end
   end
-  
+
+  # Randomly select a time slot
   time_slots.sample
 end
-
 patients = Patient.all
 doctors = Doctor.all
 
