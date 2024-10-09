@@ -2,249 +2,228 @@ require 'faker'
 require 'open-uri'
 require 'yaml'
 require 'csv'
-puts "seeding"
+require 'net/http'
+require 'json'
 
-  ###########################Seeding Admin ##################################
-  ##################################################################################
-  ##################################################################################
+puts "Seeding data..."
 
-admin = Admin.create(  email: "Admin@example.com", firstname: "Admin", lastname:"Admin", password: "123456",password_confirmation: "123456", email_confirmed: true)
-image_url = "https://thumbs.dreamstime.com/b/admin-reliure-de-bureau-sur-le-bureau-en-bois-sur-la-table-crayon-color%C3%A9-79046621.jpg"
-image_file = URI.open(image_url)
+########################### Seeding Admin ##################################
+admin = Admin.create!(
+  email: "Admin@example.com",
+  firstname: "Admin",
+  lastname: "Admin",
+  password: "123456",
+  password_confirmation: "123456",
+  email_confirmed: true
+)
 
-# Attach the image to the Admin record
+admin_avatar_url = "https://thumbs.dreamstime.com/b/admin-reliure-de-bureau-sur-le-bureau-en-bois-sur-la-table-crayon-color%C3%A9-79046621.jpg"
+admin_avatar_file = URI.open(admin_avatar_url)
+
 admin.avatar.attach(
-  io: image_file,
+  io: admin_avatar_file,
   filename: "admin_avatar.jpg",
   content_type: "image/jpeg"
 )
-    ###########################Seeding 10 doctors ##################################
-  ##################################################################################
-  ##################################################################################
+puts "Admin seeded."
 
+########################### Seeding Doctors from CSV ##################################
+csv_file_path = Rails.root.join('app', 'services', 'dermatologue_doctors.csv')
+puts "Seeding 10 doctors from CSV file..."
 
-  puts "Seeding doctors from CSV file..."
+CSV.foreach(csv_file_path, headers: true).first(10).each_with_index do |row, index|
+  doctor = Doctor.create!(
+    firstname: row['name'].split.first,
+    lastname: row['name'].split[1..].join(' '),
+    location: row['location'],
+    description: row['description'],
+    google_maps_url: row['google_maps_url'],
+    email: Faker::Internet.unique.email,
+    password: "123456",
+    password_confirmation: "123456",
+    email_confirmed: true
+  )
 
-  csv_file_path = Rails.root.join('app', 'services', 'dermatologue_doctors.csv')
-  
-
-  if File.exist?(csv_file_path)
-    doctors_data = []
-    CSV.foreach(csv_file_path, headers: true).with_index do |row, index|
-      break if index >= 10 # Limit to the first 10 doctors
-  
-      # Assuming your CSV has columns like: 'first_name', 'last_name', 'email', 'phone', 'specialty', etc.
-      doctor_data = {
-        first_name: row['first_name'],
-        last_name: row['last_name'],
-        email: row['email'],
-        phone: row['phone'],
-        specialty: row['specialty'], # Assuming there is a 'specialty' column
-        created_at: Time.now,
-        updated_at: Time.now
-      }
-  
-      doctors_data << doctor_data
-    end
-  
-    # Bulk insert doctors
-    Doctor.insert_all(doctors_data) if doctors_data.any?
-    puts "Successfully seeded #{doctors_data.size} doctors from the CSV file."
-  else
-    puts "CSV file not found: #{csv_file_path}"
-  end
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  ###################################################################################
-  ##################################################################################
-  ##################################################################################
-
-
-    ###########################Seeding Patients ##################################
-  ##################################################################################
-  ##################################################################################
-
-10.times do
-  
-    phone_number = Faker::PhoneNumber.phone_number.sub(/\D/, '').slice(0, 8)  # Remove non-digit characters and keep first 8 digits
-
-    patient = Patient.create(
-      email: Faker::Internet.unique.email,
-      firstname: Faker::Name.first_name,
-      lastname: Faker::Name.last_name,
-      password: "123456",
-      password_confirmation: "123456",
-      phone_number: phone_number,
-      email_confirmed: true
+  3.times do
+    doctor.phone_numbers.create!(
+      number: Faker::PhoneNumber.phone_number,
+      phone_type: ["personal", "home", "fax"].sample
     )
-    downloaded_image = URI.open(Faker::Avatar.image)
-    patient.avatar.attach(io: downloaded_image, filename: "#{patient.firstname}_avatar.jpg", content_type: 'image/jpg')
-    puts "Created patient: #{patient.firstname} #{patient.lastname} (#{patient.email})"
   end
 
-  ###########################Seeding Maladie ##################################
-  ##################################################################################
-  ##################################################################################
+  if row['avatar_src'].present?
+    avatar_file = URI.open(row['avatar_src'])
+    doctor.avatar.attach(io: avatar_file, filename: File.basename(row['avatar_src']), content_type: avatar_file.content_type)
+  end
 
-# Load diseases data from YAML file
+  puts "Doctor #{doctor.firstname} #{doctor.lastname} seeded."
+end
+
+########################### Seeding Patients ##################################
+puts "Seeding 10 patients..."
+10.times do
+  phone_number = Faker::PhoneNumber.phone_number.gsub(/\D/, '').slice(0, 8)
+  
+  patient = Patient.create!(
+    email: Faker::Internet.unique.email,
+    firstname: Faker::Name.first_name,
+    lastname: Faker::Name.last_name,
+    password: "123456",
+    password_confirmation: "123456",
+    phone_number: phone_number,
+    email_confirmed: true
+  )
+
+  downloaded_image = URI.open(Faker::Avatar.image)
+  patient.avatar.attach(io: downloaded_image, filename: "#{patient.firstname}_avatar.jpg", content_type: 'image/jpg')
+
+  puts "Patient #{patient.firstname} #{patient.lastname} seeded."
+end
+
+########################### Seeding Maladies from YAML ##################################
+puts "Seeding diseases..."
 starting_order = 0
 
 YAML.load_file(Rails.root.join('db', 'diseases.yml')).each do |disease_data|
-  # Extract data from the YAML file
-  disease_name = disease_data['maladie_name']
-  description = disease_data['maladie_description']
-  synonyms = disease_data['synonyms']
-  symptoms = disease_data['symptoms']
-  causes = disease_data['causes']
-  treatments = disease_data['treatments']
-  prevention = disease_data['prevention']
-  diagnosis = disease_data['diagnosis']
-  references = disease_data['references']
-  is_cancer = disease_data['is_cancer']
-  image_path = Rails.root.join('app', 'assets', 'images', disease_data['image_path']).to_s
-  starting_order = starting_order+1
-  # Create the Disease record
-  disease = Maladie.create(
-    maladie_name: disease_name,
-    maladie_description: description,
-    synonyms: synonyms,
-    symptoms: symptoms,
-    causes: causes,
-    treatments: treatments,
-    prevention: prevention,
-    diagnosis: diagnosis,
-    references: references,
-    is_cancer: is_cancer,
+  starting_order += 1
+
+  maladie = Maladie.create!(
+    maladie_name: disease_data['maladie_name'],
+    maladie_description: disease_data['maladie_description'],
+    synonyms: disease_data['synonyms'],
+    symptoms: disease_data['symptoms'],
+    causes: disease_data['causes'],
+    treatments: disease_data['treatments'],
+    prevention: disease_data['prevention'],
+    diagnosis: disease_data['diagnosis'],
+    references: disease_data['references'],
+    is_cancer: disease_data['is_cancer'],
     order: starting_order
   )
-  # Attach the image
+
+  image_path = Rails.root.join('app', 'assets', 'images', disease_data['image_path']).to_s
   if File.exist?(image_path)
-    disease.image.attach(io: File.open(image_path), filename: disease_data['image_path'], content_type: 'image/png')
+    maladie.image.attach(io: File.open(image_path), filename: disease_data['image_path'], content_type: 'image/png')
   else
-    puts "Image not found: #{image_path}"
+    puts "Image not found for #{maladie.maladie_name}: #{image_path}"
   end
-  puts "Created disease: #{disease_name}"
-  ##################################################################################
-  ##################################################################################
-  ##################################################################################
+end
 
+########################### Seeding Consultations ##################################
+puts "Seeding consultations..."
 
-  ###########################Seeding Consultation ##################################
-  ##################################################################################
-  ##################################################################################
+# Function to generate random appointment times in 30-minute intervals
+puts "Seeding consultations..."
 
-  puts "Seeding consultations..."
-  patients = Patient.all
-  doctors = Doctor.all
+# Function to generate random appointment times in 30-minute intervals
+puts "Seeding consultations..."
+
+# Function to generate random appointment times in 30-minute intervals
+def generate_random_appointment_time
+  start_time = Time.parse("09:00")
+  end_time = Time.parse("16:00")
+  time_slots = []
   
-  if patients.empty? || doctors.empty?
-    puts "No patients or doctors found in the database. Please create some first."
-  else
-    def generate_random_appointment_time
-      start_time = Time.parse("09:00")
-      end_time = Time.parse("16:00")
+  while start_time <= end_time
+    time_slots << start_time
+    start_time += 30.minutes
+  end
+  
+  time_slots.sample
+end
+
+patients = Patient.all
+doctors = Doctor.all
+
+# Ensure there are patients and doctors available
+if patients.empty? || doctors.empty?
+  puts "No patients or doctors found in the database. Please create some first."
+else
+  # Create 1000 consultations
+  1000.times do
+    doctor = doctors.sample
+    appointment_time = generate_random_appointment_time
+    appointment_date = appointment_time.to_date  # Extract just the date for comparison
+
+    # Randomly select a patient
+    patient = patients.sample
+
+    # 1. Check if the patient already has a consultation with the same doctor on the same date
+    existing_consultation_same_day = Consultation.find_by(doctor: doctor, patient: patient, appointment: appointment_date.all_day)
+
+    # 2. Check if there's already a consultation for the doctor at the exact same time
+    existing_consultation_same_time = Consultation.find_by(doctor: doctor, appointment: appointment_time)
+
+    # Loop until a valid consultation is found
+    while existing_consultation_same_day || existing_consultation_same_time
+      puts "Conflicts detected: "
       
-      time_slots = []
-      while start_time <= end_time
-        time_slots << start_time
-        start_time += 30.minutes
+      if existing_consultation_same_day
+        puts "Patient #{patient.id} already has a consultation with Doctor #{doctor.id} on #{appointment_date}."
       end
-      time_slots.sample
-    end
-  
-    1000.times do
-      patient = patients.sample
-      doctor = doctors.sample
-      appointment_time = generate_random_appointment_time
-
-      consultation = Consultation.create(
-        appointment: appointment_time,
-        status: Consultation.statuses.keys.sample,  # Randomly select status
-        doctor_id: doctor.id,
-        patient_id: patient.id,
-        is_archived: false,                    
-        refus_reason: [nil, Faker::Lorem.sentence].sample # Random refusal reason or nil
-      )
       
-      puts "Created consultation for Patient ID: #{patient.id} with Doctor ID: #{doctor.id} on #{consultation.appointment}"
+      if existing_consultation_same_time
+        puts "Appointment time #{appointment_time} already booked with Doctor #{doctor.id}."
+      end
+
+      # Generate a new appointment time and randomly select a different patient
+      appointment_time = generate_random_appointment_time
+      appointment_date = appointment_time.to_date  # Update appointment_date
+      patient = patients.sample  # Select a new random patient
+
+      # Re-check for conflicts with the new values
+      existing_consultation_same_day = Consultation.find_by(doctor: doctor, patient: patient, appointment: appointment_date.all_day)
+      existing_consultation_same_time = Consultation.find_by(doctor: doctor, appointment: appointment_time)
     end
-  
-    puts "Seeding done."
+
+    # After resolving conflicts, create the consultation
+    consultation = Consultation.create!(
+      appointment: appointment_time,
+      status: Consultation.statuses.keys.sample,  # Randomly assign a status
+      doctor: doctor,
+      patient: patient,
+      is_archived: false,
+      refus_reason: [nil, Faker::Lorem.sentence].sample
+    )
+    puts "Consultation for Patient #{consultation.patient_id} with Doctor #{consultation.doctor_id} seeded."
   end
-  
-###################################################################################
-###################################################################################
-###################################################################################
+end
 
-  ###########################Seeding Blogs ##################################
-  ##################################################################################
-  ##################################################################################
 
-  puts "Seeding blogs..."
-  # Make sure you have some doctors in your database first
-  doctors = Doctor.all
-  maladies = Maladie.all
+########################### Seeding Blogs ##################################
+puts "Seeding blogs..."
 
+if doctors.any?
   starting_order = 1
 
-  if doctors.any?
-    10.times do |index|
+  10.times do |index|
+    blog = Blog.create!(
+      title: Faker::Lorem.sentence(word_count: 6),
+      content: Faker::Lorem.paragraph(sentence_count: 15),
+      order: starting_order + index,
+      doctor: doctors.sample,
+      maladie: Maladie.all.sample
+    )
 
-      blog = Blog.new(
-        title: Faker::Lorem.sentence(word_count: 6),
-        content: Faker::Lorem.paragraph(sentence_count: 15),
-        order: starting_order + index, # Incremental order value
-        doctor: doctors.sample,
-        maladie: maladies.sample
-      )
+    image_urls = [
+      'https://res.cloudinary.com/void-elsan/image/upload/v1668002371/inline-images/Ecz%C3%A9ma.jpg',
+      'https://www.dexeryl-gamme.fr/sites/default/files/styles/featured_l_683x683_/public/images/featured/Image1.jpg?h=de238ad2&itok=jFdYeTNh',
+      'https://contourderm.com/wp-content/smush-webp/2016/08/leukotam.jpg.webp',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/SolarAcanthosis.jpg/1200px-SolarAcanthosis.jpg',
+      'https://balmonds.com/cdn/shop/articles/Should-Keratosis-Be-Removed.jpg?v=1615555350'
+    ]
 
-      # Determine a random number of images (1, 3, or 5)
-      number_of_images = [1, 3, 5].sample
-
-      # Example image URLs from the internet (you can replace these with actual URLs)
-      image_urls = [
-        'https://res.cloudinary.com/void-elsan/image/upload/v1668002371/inline-images/Ecz%C3%A9ma.jpg',
-        'https://www.dexeryl-gamme.fr/sites/default/files/styles/featured_l_683x683_/public/images/featured/Image1.jpg?h=de238ad2&itok=jFdYeTNh',
-        'https://contourderm.com/wp-content/smush-webp/2016/08/leukotam.jpg.webp',
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/SolarAcanthosis.jpg/1200px-SolarAcanthosis.jpg',
-        'https://balmonds.com/cdn/shop/articles/Should-Keratosis-Be-Removed.jpg?v=1615555350'
-      ]
-
-      # Attach the selected number of images to the blog
-      number_of_images.times do
-        random_url = image_urls.sample
-        file = URI.open(random_url)
-        blog.images.attach(io: file, filename: "#{Faker::Lorem.word}.jpg")
-      end
-
-      blog.save!
+    [1, 3, 5].sample.times do
+      file = URI.open(image_urls.sample)
+      blog.images.attach(io: file, filename: "#{Faker::Lorem.word}.jpg")
     end
-  else
-    puts "No doctors found. Please seed doctors first."
+
+    puts "Blog titled #{blog.title} seeded."
   end
-  ###################################################################################
-  ###################################################################################
-  ###################################################################################
+end
 
-  ###########################Seeding Holidays ##################################
-  ##################################################################################
-  ##################################################################################
-
-  puts "Seeding holidays 2024..."
+########################### Seeding Holidays ##################################
+puts "Seeding holidays 2024..."
     # Set up the API endpoint URL
     url = URI("https://api.api-ninjas.com/v1/holidays?country=TN&year=2024&type=PUBLIC_HOLIDAY")
 
@@ -292,8 +271,5 @@ YAML.load_file(Rails.root.join('db', 'diseases.yml')).each do |disease_data|
         is_archived: false
       )
     end
-    puts "Seeding completed! Created #{Holiday.count} holidays."
-  end
-###################################################################################
-###################################################################################
-###################################################################################
+  puts "Seeding completed! Created #{Holiday.count} holidays."
+puts "Seeding done."
