@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_10_08_132934) do
+ActiveRecord::Schema[7.0].define(version: 2024_10_07_150849) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -76,9 +76,9 @@ ActiveRecord::Schema[7.0].define(version: 2024_10_08_132934) do
   create_table "documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "title"
     t.uuid "doctor_id", null: false
+    t.boolean "is_archived", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.boolean "is_archived", default: false
   end
 
   create_table "holidays", force: :cascade do |t|
@@ -101,9 +101,9 @@ ActiveRecord::Schema[7.0].define(version: 2024_10_08_132934) do
     t.text "references"
     t.serial "order"
     t.boolean "is_archived", default: false
+    t.boolean "is_cancer", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.boolean "is_cancer", default: false
   end
 
   create_table "messages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -127,10 +127,10 @@ ActiveRecord::Schema[7.0].define(version: 2024_10_08_132934) do
     t.uuid "doctor_id", null: false
     t.string "number", null: false
     t.string "phone_type", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.boolean "is_archived", default: false
     t.boolean "is_primary", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -160,6 +160,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_10_08_132934) do
     t.string "youtube"
     t.string "facebook"
     t.string "linkedin"
+    t.string "phone_number"
     t.string "medical_history"
     t.integer "plan", default: 0
     t.integer "custom_limit", default: 0
@@ -168,7 +169,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_10_08_132934) do
     t.boolean "is_smsable", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "phone_number"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"

@@ -18,6 +18,62 @@ admin.avatar.attach(
   filename: "admin_avatar.jpg",
   content_type: "image/jpeg"
 )
+    ###########################Seeding 10 doctors ##################################
+  ##################################################################################
+  ##################################################################################
+
+
+  puts "Seeding doctors from CSV file..."
+
+  csv_file_path = Rails.root.join('app', 'services', 'dermatologue_doctors.csv')
+  
+
+  if File.exist?(csv_file_path)
+    doctors_data = []
+    CSV.foreach(csv_file_path, headers: true).with_index do |row, index|
+      break if index >= 10 # Limit to the first 10 doctors
+  
+      # Assuming your CSV has columns like: 'first_name', 'last_name', 'email', 'phone', 'specialty', etc.
+      doctor_data = {
+        first_name: row['first_name'],
+        last_name: row['last_name'],
+        email: row['email'],
+        phone: row['phone'],
+        specialty: row['specialty'], # Assuming there is a 'specialty' column
+        created_at: Time.now,
+        updated_at: Time.now
+      }
+  
+      doctors_data << doctor_data
+    end
+  
+    # Bulk insert doctors
+    Doctor.insert_all(doctors_data) if doctors_data.any?
+    puts "Successfully seeded #{doctors_data.size} doctors from the CSV file."
+  else
+    puts "CSV file not found: #{csv_file_path}"
+  end
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  ###################################################################################
+  ##################################################################################
+  ##################################################################################
+
+
     ###########################Seeding Patients ##################################
   ##################################################################################
   ##################################################################################
@@ -94,13 +150,27 @@ YAML.load_file(Rails.root.join('db', 'diseases.yml')).each do |disease_data|
   puts "Seeding consultations..."
   patients = Patient.all
   doctors = Doctor.all
+  
   if patients.empty? || doctors.empty?
-    puts "No patients, doctors,  found in the database. Please create some first."
+    puts "No patients or doctors found in the database. Please create some first."
   else
+    def generate_random_appointment_time
+      start_time = Time.parse("09:00")
+      end_time = Time.parse("16:00")
+      
+      time_slots = []
+      while start_time <= end_time
+        time_slots << start_time
+        start_time += 30.minutes
+      end
+      time_slots.sample
+    end
+  
     1000.times do
       patient = patients.sample
       doctor = doctors.sample
-      appointment_time = Faker::Time.forward(days: 30, period: :evening)
+      appointment_time = generate_random_appointment_time
+
       consultation = Consultation.create(
         appointment: appointment_time,
         status: Consultation.statuses.keys.sample,  # Randomly select status
@@ -109,11 +179,13 @@ YAML.load_file(Rails.root.join('db', 'diseases.yml')).each do |disease_data|
         is_archived: false,                    
         refus_reason: [nil, Faker::Lorem.sentence].sample # Random refusal reason or nil
       )
+      
       puts "Created consultation for Patient ID: #{patient.id} with Doctor ID: #{doctor.id} on #{consultation.appointment}"
     end
+  
     puts "Seeding done."
   end
-
+  
 ###################################################################################
 ###################################################################################
 ###################################################################################
