@@ -84,7 +84,8 @@ class Api::V1::ConsultationsController < ApplicationController
     rendered_consultations = @consultations.map do |consultation|
       consultation_hash = consultation.as_json(include: {
         doctor: {
-          methods: [:user_image_url]
+          methods: [:user_image_url],
+          include: :phone_numbers
         },
         patient: { methods: [:user_image_url] }
       })
