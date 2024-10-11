@@ -24,7 +24,7 @@
 /tmp/pids/*
 !/tmp/pids/
 !/tmp/pids/.keep
-
+.env
 
 #Remove all myenv file in python for deep learning
 /myenv/
