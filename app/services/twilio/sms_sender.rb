@@ -8,25 +8,40 @@ module Twilio
     def initialize(body:, to_phone_number:)
       @body = body
       @to_phone_number = to_phone_number
+      validate_environment_variables
     end
 
     def send_sms
-      @client = Twilio::REST::Client.new(ENV['TWILIO_ACCOUNT_SID'], ENV['TWILIO_AUTH_TOKEN'])
-      message = @client.messages
-        .create(
+      @client = Twilio::REST::Client.new(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+      
+      begin
+        message = @client.messages.create(
           body: @body,
-          from: ENV['TWILIO_FROM_PHONE'],
+          from: TWILIO_FROM_PHONE,
           to: to(@to_phone_number)
         )
-      puts message.sid
+        Rails.logger.info("Message sent successfully: #{message.sid}")
+      rescue Twilio::REST::RestError => e
+        Rails.logger.error("Failed to send message: #{e.message}")
+        # Handle the error as needed (e.g., raise, notify, etc.)
+      end
     end
 
     private
 
     def to(to_phone_number)
-      return ENV['TWILIO_TEST_PHONE'] if Rails.env.development?
+      Rails.env.development? ? TWILIO_TEST_PHONE : to_phone_number
+    end
 
-      to_phone_number
+    def validate_environment_variables
+      missing_vars = []
+      missing_vars << 'TWILIO_ACCOUNT_SID' if TWILIO_ACCOUNT_SID.blank?
+      missing_vars << 'TWILIO_AUTH_TOKEN' if TWILIO_AUTH_TOKEN.blank?
+      missing_vars << 'TWILIO_FROM_PHONE' if TWILIO_FROM_PHONE.blank?
+
+      unless missing_vars.empty?
+        raise "Missing environment variables: #{missing_vars.join(', ')}"
+      end
     end
   end
 end
