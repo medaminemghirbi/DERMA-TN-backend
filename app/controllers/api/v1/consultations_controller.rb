@@ -45,7 +45,8 @@ class Api::V1::ConsultationsController < ApplicationController
     if valid_status?(consultation_params[:status])
       if @consultation.update(consultation_params)
         handle_notifications(@consultation.patient_id, @consultation.doctor_id, @consultation)
-        render json: @consultation, include: [:user]
+        handle_sms(@consultation.patient_id, @consultation.doctor_id, @consultation)
+        render json: @consultation
       else
         render json: @consultation.errors, status: :unprocessable_entity
       end
@@ -202,6 +203,25 @@ class Api::V1::ConsultationsController < ApplicationController
     end
   end
 
+  def handle_sms(patient_id, doctor_id, consultation)
+    @doctor = User.find(doctor_id)
+    @patient = User.find(patient_id)
+  
+    if @doctor.is_smsable && @patient.is_smsable
+      message = "Your request with doctor has been accepted. Check your account."
+  
+      # Create instances of SmsSender for both the doctor and patient
+      sms_sender_to_patient = Twilio::SmsSender.new(body: message, to_phone_number: @patient.phone_number)
+  
+      begin
+        sms_sender_to_patient.send_sms
+        sms_sender_to_doctor.send_sms
+      rescue => e
+        puts "Error sending SMS: #{e.message}"
+      end
+    end
+  end
+  
   TIME_SLOTS = [
     { time: "09:00" },
     { time: "09:30" },

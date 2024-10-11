@@ -71,6 +71,7 @@ puts "Seeding 10 patients..."
     password: "123456",
     password_confirmation: "123456",
     phone_number: phone_number,
+    location: ["sousse", "ben-arous", "bizerte", "beja", "gabes", "gafsa", "ariana", "hammamet","monastir"].sample,
     email_confirmed: true
   )
 

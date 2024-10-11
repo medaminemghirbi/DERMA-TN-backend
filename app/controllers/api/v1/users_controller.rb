@@ -77,7 +77,30 @@ class Api::V1::UsersController < ApplicationController
           }, status: :unprocessable_entity
       end
     end
+    def working_saturday
+      @user = User.find(params[:id])
 
+      if  @user.update(working_saturday: params[:working_saturday])
+        render json: @user, methods: [:user_image_url]
+      else
+        render json: {
+          status: 422,
+          errors: @user.errors.full_messages  # Use @user.errors directly instead of @user.user_setting.errors
+          }, status: :unprocessable_entity
+      end
+    end
+    def sms_notifications
+      @user = User.find(params[:id])
+
+      if  @user.update(is_smsable: params[:is_smsable])
+        render json: @user, methods: [:user_image_url]
+      else
+        render json: {
+          status: 422,
+          errors: @user.errors.full_messages  # Use @user.errors directly instead of @user.user_setting.errors
+          }, status: :unprocessable_entity
+      end
+    end
     def update_uesr_informations
       @user = User.find(params[:id])
       if @user.update(params_informations_user)
@@ -93,7 +116,7 @@ class Api::V1::UsersController < ApplicationController
         params.permit(:id, :avatar)
       end
       def params_informations_user
-        params.permit(:id, :civil_status, :gender, :birthday)
+        params.permit(:id, :civil_status, :gender, :birthday, :lastname, :firstname, :location)
       end
       def params_location_doctor
         params.permit(:id, :latitude, :longitude)

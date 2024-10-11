@@ -40,6 +40,8 @@ class CreateUsers < ActiveRecord::Migration[7.0]
       t.boolean :is_emailable, default: true
       t.boolean :is_notifiable, default: true
       t.boolean :is_smsable, default: true
+      t.boolean :working_saturday, :default => false
+
       t.timestamps
 
     end

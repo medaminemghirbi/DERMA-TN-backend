@@ -36,6 +36,9 @@ Rails.application.routes.draw do
             member do
               put 'email_notifications', to: 'users#update_email_notifications'
               put 'system_notifications', to: 'users#update_system_notifications'
+              put 'working_saturday', to: 'users#working_saturday'
+              put 'sms_notifications', to: 'users#sms_notifications'
+
             end
           end  
           get 'messages/:message_id/images/:image_id', to: 'messages#download_image'
@@ -72,9 +75,7 @@ Rails.application.routes.draw do
           patch 'update_uesr_informations/:id', to: 'users#update_uesr_informations'
           get 'download_file/:id', to: 'documents#download'
           delete 'delete_all_documents/:id', to: 'documents#delete_all_documents'
-
-          
-          
+          post 'update_address', to: 'locations#update_address'
         end
       end
 
