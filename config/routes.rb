@@ -16,7 +16,7 @@ Rails.application.routes.draw do
           get :confirm_email
         end
       end
-  
+      post 'predict/:doctor_id', to: 'predictions#predict'
       namespace :api do
         namespace :v1 do
           resources :doctors do
@@ -48,7 +48,6 @@ Rails.application.routes.draw do
           get 'reload_data', to: 'scrapers#run'
           get 'last_run', to: 'scrapers#last_run'
 
-          post 'predict/:doctor_id', to: 'predictions#predict'
 
     
           get 'doctor_consultations_today/:doctor_id', to: 'consultations#doctor_consultations_today'
@@ -56,14 +55,10 @@ Rails.application.routes.draw do
           get 'consultations/available_seances/:doctor_id', to: 'consultations#available_seances_for_year'
           get 'doctor_consultations/:doctor_id', to: 'consultations#doctor_consultations'
           get 'available_time_slots/:date/:doctor_id', to: 'consultations#available_time_slots'
-
           get 'verified_blogs', to: 'blogs#verified_blogs'
           get 'my_blogs/:doctor_id', to: 'blogs#my_blogs'
-
-
           get 'statistique', to: 'users#count_all_for_admin'
           patch 'update_location/:id', to: 'users#update_location'
-
           get 'all_locations', to: 'doctors#unique_locations'
           get 'doctor_stats/:doctor_id', to: 'doctors#getDoctorStatistique'
           patch 'doctors/:id/upgrade_plan', to: 'doctors#upgrade_doctor_plan'
@@ -76,9 +71,10 @@ Rails.application.routes.draw do
           get 'download_file/:id', to: 'documents#download'
           delete 'delete_all_documents/:id', to: 'documents#delete_all_documents'
           post 'update_address', to: 'locations#update_address'
+          get 'nearest_doctors', to: 'doctors#nearest'
+          
         end
       end
 
-    # get 'nearest_doctors', to: 'doctors#nearest'
     # resources :users
 end

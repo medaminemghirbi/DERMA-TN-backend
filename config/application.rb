@@ -34,5 +34,6 @@ module PFe2023Back
     config.autoload_paths << "#{Rails.root}/lib"
     config.autoload_paths += %W(#{config.root}/app/services)
     config.autoload_paths += %W(#{config.root}/app/deep_learning)
+    config.action_dispatch.default_headers.delete('X-Frame-Options')
   end
 end

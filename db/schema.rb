@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_10_11_140309) do
+ActiveRecord::Schema[7.0].define(version: 2024_10_07_150849) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -164,12 +164,13 @@ ActiveRecord::Schema[7.0].define(version: 2024_10_11_140309) do
     t.string "medical_history"
     t.integer "plan", default: 0
     t.integer "custom_limit", default: 0
+    t.integer "radius", default: 1
     t.boolean "is_emailable", default: true
     t.boolean "is_notifiable", default: true
     t.boolean "is_smsable", default: true
+    t.boolean "working_saturday", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.boolean "working_saturday", default: false
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
