@@ -24,7 +24,7 @@ class Api::V1::DoctorsController < ApplicationController
 
   def show
     @Doctor = Doctor.find(params[:id])
-    render json: @Doctor
+    render json: @Doctor, methods: [:user_image_url], include: :phone_numbers 
   end
 
 
@@ -85,7 +85,7 @@ class Api::V1::DoctorsController < ApplicationController
     coordinates = Geocoder.coordinates(location)
     if coordinates
       @doctors = Doctor.near(coordinates, radius, units: :km)
-      render json: @doctors
+      render json: @doctors, methods: [:user_image_url]
     else
       render json: { error: 'Location not found' }, status: :unprocessable_entity
     end

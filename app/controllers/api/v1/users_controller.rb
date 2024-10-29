@@ -101,6 +101,18 @@ class Api::V1::UsersController < ApplicationController
           }, status: :unprocessable_entity
       end
     end
+    def working_online
+      @user = User.find(params[:id])
+
+      if  @user.update(working_on_line: params[:working_on_line])
+        render json: @user, methods: [:user_image_url]
+      else
+        render json: {
+          status: 422,
+          errors: @user.errors.full_messages  # Use @user.errors directly instead of @user.user_setting.errors
+          }, status: :unprocessable_entity
+      end
+    end
     def update_uesr_informations
       @user = User.find(params[:id])
       if @user.update(params_informations_user)

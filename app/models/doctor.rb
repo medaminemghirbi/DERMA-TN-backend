@@ -22,7 +22,7 @@ class Doctor < User
   has_many :blogs, dependent: :destroy
   has_many :consultations, dependent: :destroy
   has_many :phone_numbers, dependent: :destroy
-
+  has_many :custom_mails
 
   def daily_limit
     case plan

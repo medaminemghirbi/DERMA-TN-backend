@@ -42,6 +42,7 @@ class CreateUsers < ActiveRecord::Migration[7.0]
       t.boolean :is_notifiable, default: true
       t.boolean :is_smsable, default: true
       t.boolean :working_saturday, :default => false
+      t.boolean :working_on_line, :default => false
 
       t.timestamps
 

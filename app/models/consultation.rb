@@ -1,6 +1,8 @@
 class Consultation < ApplicationRecord
   ## Scopes
-  enum status: { pending: 0, approved: 1, rejected: 2, canceled: 3 }
+  enum status: { pending: 0, approved: 1, rejected: 2, canceled: 3, finished: 4 }
+  enum appointment_type: { onsite: 0, online: 1 }
+  
   scope :current, -> { where(is_archived: false) }
   after_create_commit { broadcast_notification }
 
@@ -32,8 +34,19 @@ class Consultation < ApplicationRecord
   { time: "15:30" },
   { time: "16:00" }
 ]
+  def generate_room_code
+    self.room_code = loop do
+      random_code = SecureRandom.alphanumeric(8).upcase
+      break random_code unless Consultation.exists?(room_code: random_code)
+    end
+  end
+  def within_60_minutes_before_appointment?
+    Time.current >= (self.appointment - 60.minutes) && Time.current < self.appointment
+  end
+
 
   private
+
   def verified_consultation_booked
     if Consultation.where(appointment: appointment, status: :approved, doctor_id: doctor_id).exists?
       errors.add(:appointment, "is already booked for an approved consultation at this time.")
@@ -52,4 +65,5 @@ class Consultation < ApplicationRecord
 
     })
   end
+
 end
