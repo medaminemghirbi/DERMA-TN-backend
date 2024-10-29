@@ -58,15 +58,15 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_04_084825) do
   create_table "consultations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "appointment", null: false
     t.integer "status", default: 0
+    t.integer "appointment_type", default: 0
     t.boolean "is_archived", default: false
     t.uuid "doctor_id", null: false
     t.uuid "patient_id", null: false
     t.string "refus_reason"
+    t.string "note"
+    t.string "room_code"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "note"
-    t.integer "appointment_type", default: 0
-    t.string "room_code"
   end
 
   create_table "custom_mails", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -183,9 +183,9 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_04_084825) do
     t.boolean "is_notifiable", default: true
     t.boolean "is_smsable", default: true
     t.boolean "working_saturday", default: false
+    t.boolean "working_on_line", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.boolean "working_on_line", default: false
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
