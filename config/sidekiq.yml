@@ -1,0 +1,9 @@
+:concurrency: 5
+:queues:
+  - default
+:scheduler:
+  :schedule:
+    GenerateRoomCodeJob:
+      description: 'Generate room code for consultations'
+      queue: default
+      cron: '*/1 * * * *'  # Runs every minute

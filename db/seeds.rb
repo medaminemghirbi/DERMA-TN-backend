@@ -31,7 +31,7 @@ puts "Admin seeded."
 csv_file_path = Rails.root.join('app', 'services', 'dermatologue_doctors.csv')
 puts "Seeding 10 doctors from CSV file..."
 
-CSV.foreach(csv_file_path, headers: true).first(10).each_with_index do |row, index|
+CSV.foreach(csv_file_path, headers: true).first(30).each_with_index do |row, index|
   doctor = Doctor.create!(
     firstname: row['name'].split.first,
     lastname: row['name'].split[1..].join(' '),
@@ -71,6 +71,7 @@ puts "Seeding 10 patients..."
     password: "123456",
     password_confirmation: "123456",
     phone_number: phone_number,
+    location: ["sousse", "ben-arous", "bizerte", "beja", "gabes", "gafsa", "ariana", "hammamet","monastir"].sample,
     email_confirmed: true
   )
 

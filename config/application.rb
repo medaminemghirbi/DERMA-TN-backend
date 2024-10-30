@@ -34,5 +34,12 @@ module PFe2023Back
     config.autoload_paths << "#{Rails.root}/lib"
     config.autoload_paths += %W(#{config.root}/app/services)
     config.autoload_paths += %W(#{config.root}/app/deep_learning)
+    config.action_dispatch.default_headers.delete('X-Frame-Options')
+    config.time_zone = 'Africa/Tunis'
+    config.active_job.queue_adapter = :sidekiq
+    config.active_record.encryption.primary_key = Rails.application.credentials.dig(:active_record_encryption, :primary_key)
+    config.active_record.encryption.deterministic_key = Rails.application.credentials.dig(:active_record_encryption, :deterministic_key)
+    config.active_record.encryption.key_derivation_salt = Rails.application.credentials.dig(:active_record_encryption, :key_derivation_salt)
+  
   end
 end

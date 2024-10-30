@@ -3,10 +3,13 @@ class CreateConsultations < ActiveRecord::Migration[7.0]
     create_table :consultations, id: :uuid do |t|
       t.datetime :appointment, null: false
       t.integer :status, default: 0
+      t.integer :appointment_type, default: 0
       t.boolean :is_archived, default: false
       t.uuid :doctor_id, null: false
       t.uuid :patient_id, null: false
       t.string :refus_reason
+      t.string :note
+      t.string :room_code
       t.timestamps
     end
     add_foreign_key :consultations, :users, column: :doctor_id

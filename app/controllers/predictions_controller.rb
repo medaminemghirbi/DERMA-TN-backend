@@ -43,8 +43,8 @@ class PredictionsController < ApplicationController
 
     # Clean up the temporary file
     File.delete(image_path)
-
+    maladie = Maladie.find_by(maladie_name: predicted_class)
     # Return the result as JSON
-    render json: { predicted_class: predicted_class, probability: probability.strip }
+    render json: { predicted_class: predicted_class, maladie: maladie, probability: probability.strip }
   end
 end

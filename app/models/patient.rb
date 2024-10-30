@@ -4,6 +4,7 @@ class Patient < User
   include Rails.application.routes.url_helpers
 
   has_one_attached :avatar  ##Includes
+  has_many :custom_mails
 
   ## Callbacks
 

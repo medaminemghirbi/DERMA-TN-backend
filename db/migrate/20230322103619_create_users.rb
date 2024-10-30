@@ -35,11 +35,15 @@ class CreateUsers < ActiveRecord::Migration[7.0]
       t.string :medical_history
       t.integer :plan, default: 0
       t.integer :custom_limit, default: 0
+      t.integer :radius, default: 1
 
       #Add User Settings to avoid tables
       t.boolean :is_emailable, default: true
       t.boolean :is_notifiable, default: true
       t.boolean :is_smsable, default: true
+      t.boolean :working_saturday, :default => false
+      t.boolean :working_on_line, :default => false
+
       t.timestamps
 
     end

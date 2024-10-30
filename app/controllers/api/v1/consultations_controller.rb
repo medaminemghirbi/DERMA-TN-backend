@@ -1,20 +1,17 @@
 class Api::V1::ConsultationsController < ApplicationController
-  before_action :set_consultation, only: [:show, :update, :destroy]
+  before_action :set_consultation, only: [ :update, :destroy]
 
   # GET /consultations
   def index
     render json: Consultation.current
   end
 
-  # GET /consultations/1
-  def show
-    render json: @consultation
-  end
+
 
   # POST /consultations
   def create
     @consultation = Consultation.new(consultation_params)
-
+  
     if check_request_date?
       render json: { error: "You cannot add a request date infeieur at today." }, status: :unprocessable_entity
       return
@@ -25,6 +22,11 @@ class Api::V1::ConsultationsController < ApplicationController
       return
     end
 
+    
+    if consultation_with_other_doctor?
+      render json: { error: "You already created you cant create  consultation at the same time with a different doctor." }, status: :unprocessable_entity
+      return
+    end
     if consultation_exists?
       render json: { error: "You already created a consultation request on this date." }, status: :unprocessable_entity
       return
@@ -45,7 +47,8 @@ class Api::V1::ConsultationsController < ApplicationController
     if valid_status?(consultation_params[:status])
       if @consultation.update(consultation_params)
         handle_notifications(@consultation.patient_id, @consultation.doctor_id, @consultation)
-        render json: @consultation, include: [:user]
+        handle_sms(@consultation.patient_id, @consultation.doctor_id, @consultation)
+        render json: @consultation
       else
         render json: @consultation.errors, status: :unprocessable_entity
       end
@@ -77,7 +80,16 @@ class Api::V1::ConsultationsController < ApplicationController
       patient: { methods: [:user_image_url] }
     }
   end
-
+  def patient_appointments
+    @consultations = Consultation.current.where(patient_id: params[:patient_id])
+    render json: @consultations, include: {
+      doctor: {
+        methods: [:user_image_url],
+        include: :phone_numbers
+      },
+      patient: { methods: [:user_image_url] }
+    }
+  end
   # GET /consultations/doctor_consultations
   def doctor_consultations
     @consultations = Consultation.current.where(doctor_id: params[:doctor_id], status: 1)
@@ -126,20 +138,38 @@ class Api::V1::ConsultationsController < ApplicationController
     date = Date.parse(date_str)
     start_of_day = date.beginning_of_day.in_time_zone('Africa/Tunis')
     end_of_day = date.end_of_day.in_time_zone('Africa/Tunis')
-
+  
     approved_consultations = Consultation.where(
       doctor_id: doctor_id,
       status: 1,
       appointment: start_of_day..end_of_day
     )
-
+  
+    # Collect occupied slots
     occupied_slots = approved_consultations.pluck(:appointment).map do |appointment|
       appointment.in_time_zone('Africa/Tunis').strftime("%H:%M")
     end
-
+  
+    # Prepare available and unavailable slots
     available_slots = TIME_SLOTS.reject { |slot| occupied_slots.include?(slot[:time]) }
-
-    render json: available_slots
+    unavailable_slots = TIME_SLOTS.select { |slot| occupied_slots.include?(slot[:time]) }
+  
+    # Combine available and unavailable slots into a response
+    response = {
+      available_slots: available_slots,
+      unavailable_slots: unavailable_slots
+    }
+  
+    render json: response
+  end
+  
+  def code_room_exist
+    consultation = Consultation.find_by(room_code: params[:code])
+    if consultation
+      render json: consultation, status: :ok
+    else
+      render json: { error: 'Consultation with the specified room code does not exist.' }, status: :unprocessable_entity
+    end
   end
 
   private
@@ -157,7 +187,9 @@ class Api::V1::ConsultationsController < ApplicationController
   end
 
   def consultation_params
-    params.permit(:appointment, :status, :refus_reason, :is_archived, :doctor_id, :patient_id, :id)
+    permitted_params = params.permit(:appointment, :status, :refus_reason, :is_archived, :doctor_id, :patient_id, :appointment_type, :note, :id)
+    permitted_params[:appointment_type] = permitted_params[:appointment_type].to_i if permitted_params[:appointment_type].present?
+    permitted_params
   end
 
   def valid_status?(status)
@@ -168,14 +200,25 @@ class Api::V1::ConsultationsController < ApplicationController
     Holiday.where(holiday_date: @consultation.appointment).exists?
   end
 
+
+
   def consultation_exists?
-    Consultation.where(
+    # Check if a consultation already exists for the same patient, doctor, and appointment time
+    existing_consultation = Consultation.where(
       appointment: @consultation.appointment,
       doctor_id: @consultation.doctor_id,
-      patient_id: @consultation.patient_id,
-      status: @consultation.status
-    ).exists? || 
-    Consultation.where(appointment: @consultation.appointment, status: :approved).exists?
+      patient_id: @consultation.patient_id
+    ).exists?
+    existing_consultation
+  end
+
+  def consultation_with_other_doctor?
+    # Check if the same patient has another consultation at the same time with a different doctor
+    overlapping_consultation = Consultation.where(
+      appointment: @consultation.appointment,
+      patient_id: @consultation.patient_id
+    ).where.not(doctor_id: @consultation.doctor_id).exists?
+    overlapping_consultation
   end
 
   def handle_notifications(patient_id, doctor_id, consultation)
@@ -202,6 +245,25 @@ class Api::V1::ConsultationsController < ApplicationController
     end
   end
 
+  def handle_sms(patient_id, doctor_id, consultation)
+    @doctor = User.find(doctor_id)
+    @patient = User.find(patient_id)
+  
+    if @doctor.is_smsable && @patient.is_smsable
+      message = "Your request with doctor has been accepted. Check your account."
+  
+      # Create instances of SmsSender for both the doctor and patient
+      sms_sender_to_patient = Twilio::SmsSender.new(body: message, to_phone_number: @patient.phone_number)
+  
+      begin
+        sms_sender_to_patient.send_sms
+        sms_sender_to_doctor.send_sms
+      rescue => e
+        puts "Error sending SMS: #{e.message}"
+      end
+    end
+  end
+  
   TIME_SLOTS = [
     { time: "09:00" },
     { time: "09:30" },

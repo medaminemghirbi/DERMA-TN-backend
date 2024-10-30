@@ -24,7 +24,7 @@ class Api::V1::DoctorsController < ApplicationController
 
   def show
     @Doctor = Doctor.find(params[:id])
-    render json: @Doctor
+    render json: @Doctor, methods: [:user_image_url], include: :phone_numbers 
   end
 
 
@@ -80,11 +80,18 @@ class Api::V1::DoctorsController < ApplicationController
   end
 
   def nearest
-    user_location = [params[:latitude], params[:longitude]]
-    @doctors = Doctor.near(user_location, 10) # 10 km radius
-    #@doctors = Doctor.near([current_latitude, current_longitude], 10) # 10 km radius
-    render json: @doctors
+    location = params[:location]
+    radius = params[:radius] || 20
+    coordinates = Geocoder.coordinates(location)
+    if coordinates
+      @doctors = Doctor.near(coordinates, radius, units: :km)
+      render json: @doctors, methods: [:user_image_url]
+    else
+      render json: { error: 'Location not found' }, status: :unprocessable_entity
+    end
   end
+
+
   def updatedoctorimage
     @user = User.find(params[:id])
     if @user.update(paramsimagefreelancer)

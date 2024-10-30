@@ -9,6 +9,7 @@
 
 #Ignore .byebug_history
 .byebug_history
+.env
 .vscode/settings.json
 # Ignore the default SQLite database.
 /db/*.sqlite3

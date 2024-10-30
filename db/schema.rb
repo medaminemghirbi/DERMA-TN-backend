@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_10_07_150849) do
+ActiveRecord::Schema[7.0].define(version: 2024_11_04_084825) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -58,10 +58,24 @@ ActiveRecord::Schema[7.0].define(version: 2024_10_07_150849) do
   create_table "consultations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.datetime "appointment", null: false
     t.integer "status", default: 0
+    t.integer "appointment_type", default: 0
     t.boolean "is_archived", default: false
     t.uuid "doctor_id", null: false
     t.uuid "patient_id", null: false
     t.string "refus_reason"
+    t.string "note"
+    t.string "room_code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "custom_mails", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "doctor_id"
+    t.string "patient_id"
+    t.string "subject"
+    t.text "body"
+    t.string "status", default: "sent"
+    t.datetime "sent_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -164,9 +178,12 @@ ActiveRecord::Schema[7.0].define(version: 2024_10_07_150849) do
     t.string "medical_history"
     t.integer "plan", default: 0
     t.integer "custom_limit", default: 0
+    t.integer "radius", default: 1
     t.boolean "is_emailable", default: true
     t.boolean "is_notifiable", default: true
     t.boolean "is_smsable", default: true
+    t.boolean "working_saturday", default: false
+    t.boolean "working_on_line", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
