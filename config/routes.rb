@@ -65,6 +65,8 @@ Rails.application.routes.draw do
           patch 'update_location/:id', to: 'users#update_location'
           get 'all_locations', to: 'doctors#unique_locations'
           get 'doctor_stats/:doctor_id', to: 'doctors#getDoctorStatistique'
+          get 'patient_stats/:patient_id', to: 'patients#getPatientStatistique'
+
           patch 'doctors/:id/upgrade_plan', to: 'doctors#upgrade_doctor_plan'
           get 'get_doctors_by_locations/:location', to: 'doctors#get_doctors_by_locations'
           get 'location_details', to: 'locations#details'

@@ -11,7 +11,12 @@ class Api::V1::PatientsController < ApplicationController
     @Patient.update(is_archived: true)
   end
 
-
+  def getPatientStatistique
+    @consultations = Consultation.current.where(patient_id: params[:patient_id]).count
+    render json: {
+      consultation: @consultations
+    }
+  end
   #************************* les fonctions private de classe ***********************#
 
   private
