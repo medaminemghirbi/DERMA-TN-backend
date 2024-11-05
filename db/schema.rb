@@ -161,6 +161,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_04_084825) do
     t.integer "gender"
     t.integer "civil_status"
     t.boolean "is_archived", default: false
+    t.integer "order", default: 1
     t.string "type"
     t.string "location"
     t.string "specialization"

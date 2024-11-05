@@ -14,6 +14,7 @@ class CreateUsers < ActiveRecord::Migration[7.0]
       t.integer :gender
       t.integer :civil_status
       t.boolean  :is_archived, :default => false
+      t.integer :order, default: 1
       # Add this column for STI
       t.string :type
       # Add Doctor-specific fields

@@ -14,7 +14,7 @@ class Api::V1::DoctorsController < ApplicationController
     }
   end
   def index
-    doctors = Doctor.current.all
+    doctors = Doctor.current.order(:order).all
   
     render json: doctors.as_json(
       methods: [:user_image_url]

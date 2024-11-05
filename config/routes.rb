@@ -51,7 +51,7 @@ Rails.application.routes.draw do
           get 'reload_data', to: 'scrapers#run'
           get 'last_run', to: 'scrapers#last_run'
           get 'code_room_exist', to: 'consultations#code_room_exist'
-          get 'getAllEmails/:id', to: 'custom_mails#get_all_emails_doctor'
+          get 'getAllEmails/:type/:id', to: 'custom_mails#get_all_emails_doctor'
 
           
           get 'doctor_consultations_today/:doctor_id', to: 'consultations#doctor_consultations_today'

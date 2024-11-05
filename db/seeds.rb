@@ -30,7 +30,7 @@ puts "Admin seeded."
 ########################### Seeding Doctors from CSV ##################################
 csv_file_path = Rails.root.join('app', 'services', 'dermatologue_doctors.csv')
 puts "Seeding 10 doctors from CSV file..."
-
+starting_order = 1
 CSV.foreach(csv_file_path, headers: true).first(30).each_with_index do |row, index|
   doctor = Doctor.create!(
     firstname: row['name'].split.first,
@@ -39,6 +39,7 @@ CSV.foreach(csv_file_path, headers: true).first(30).each_with_index do |row, ind
     description: row['description'],
     google_maps_url: row['google_maps_url'],
     email: Faker::Internet.unique.email,
+    order: starting_order + index,
     password: "123456",
     password_confirmation: "123456",
     email_confirmed: true
@@ -61,7 +62,8 @@ end
 
 ########################### Seeding Patients ##################################
 puts "Seeding 10 patients..."
-10.times do
+starting_order = 1
+10.times do |index|
   phone_number = Faker::PhoneNumber.phone_number.gsub(/\D/, '').slice(0, 8)
   
   patient = Patient.create!(
@@ -69,8 +71,10 @@ puts "Seeding 10 patients..."
     firstname: Faker::Name.first_name,
     lastname: Faker::Name.last_name,
     password: "123456",
+    order: starting_order + index,
     password_confirmation: "123456",
     phone_number: phone_number,
+  
     location: ["sousse", "ben-arous", "bizerte", "beja", "gabes", "gafsa", "ariana", "hammamet","monastir"].sample,
     email_confirmed: true
   )
@@ -80,7 +84,6 @@ puts "Seeding 10 patients..."
 
   puts "Patient #{patient.firstname} #{patient.lastname} seeded."
 end
-
 ########################### Seeding Maladies from YAML ##################################
 puts "Seeding diseases..."
 starting_order = 0
@@ -132,62 +135,62 @@ def generate_random_appointment_time
   # Randomly select a time slot
   time_slots.sample
 end
-patients = Patient.all
+# patients = Patient.all
 doctors = Doctor.all
 
-# Ensure there are patients and doctors available
-if patients.empty? || doctors.empty?
-  puts "No patients or doctors found in the database. Please create some first."
-else
-  # Create 1000 consultations
-  1000.times do
-    doctor = doctors.sample
-    appointment_time = generate_random_appointment_time
-    appointment_date = appointment_time.to_date  # Extract just the date for comparison
+# # Ensure there are patients and doctors available
+# if patients.empty? || doctors.empty?
+#   puts "No patients or doctors found in the database. Please create some first."
+# else
+#   # Create 1000 consultations
+#   1000.times do
+#     doctor = doctors.sample
+#     appointment_time = generate_random_appointment_time
+#     appointment_date = appointment_time.to_date  # Extract just the date for comparison
 
-    # Randomly select a patient
-    patient = patients.sample
+#     # Randomly select a patient
+#     patient = patients.sample
 
-    # 1. Check if the patient already has a consultation with the same doctor on the same date
-    existing_consultation_same_day = Consultation.find_by(doctor: doctor, patient: patient, appointment: appointment_date.all_day)
+#     # 1. Check if the patient already has a consultation with the same doctor on the same date
+#     existing_consultation_same_day = Consultation.find_by(doctor: doctor, patient: patient, appointment: appointment_date.all_day)
 
-    # 2. Check if there's already a consultation for the doctor at the exact same time
-    existing_consultation_same_time = Consultation.find_by(doctor: doctor, appointment: appointment_time)
+#     # 2. Check if there's already a consultation for the doctor at the exact same time
+#     existing_consultation_same_time = Consultation.find_by(doctor: doctor, appointment: appointment_time)
 
-    # Loop until a valid consultation is found
-    while existing_consultation_same_day || existing_consultation_same_time
-      puts "Conflicts detected: "
+#     # Loop until a valid consultation is found
+#     while existing_consultation_same_day || existing_consultation_same_time
+#       puts "Conflicts detected: "
       
-      if existing_consultation_same_day
-        puts "Patient #{patient.id} already has a consultation with Doctor #{doctor.id} on #{appointment_date}."
-      end
+#       if existing_consultation_same_day
+#         puts "Patient #{patient.id} already has a consultation with Doctor #{doctor.id} on #{appointment_date}."
+#       end
       
-      if existing_consultation_same_time
-        puts "Appointment time #{appointment_time} already booked with Doctor #{doctor.id}."
-      end
+#       if existing_consultation_same_time
+#         puts "Appointment time #{appointment_time} already booked with Doctor #{doctor.id}."
+#       end
 
-      # Generate a new appointment time and randomly select a different patient
-      appointment_time = generate_random_appointment_time
-      appointment_date = appointment_time.to_date  # Update appointment_date
-      patient = patients.sample  # Select a new random patient
+#       # Generate a new appointment time and randomly select a different patient
+#       appointment_time = generate_random_appointment_time
+#       appointment_date = appointment_time.to_date  # Update appointment_date
+#       patient = patients.sample  # Select a new random patient
 
-      # Re-check for conflicts with the new values
-      existing_consultation_same_day = Consultation.find_by(doctor: doctor, patient: patient, appointment: appointment_date.all_day)
-      existing_consultation_same_time = Consultation.find_by(doctor: doctor, appointment: appointment_time)
-    end
+#       # Re-check for conflicts with the new values
+#       existing_consultation_same_day = Consultation.find_by(doctor: doctor, patient: patient, appointment: appointment_date.all_day)
+#       existing_consultation_same_time = Consultation.find_by(doctor: doctor, appointment: appointment_time)
+#     end
 
-    # After resolving conflicts, create the consultation
-    consultation = Consultation.create!(
-      appointment: appointment_time,
-      status: Consultation.statuses.keys.sample,  # Randomly assign a status
-      doctor: doctor,
-      patient: patient,
-      is_archived: false,
-      refus_reason: [nil, Faker::Lorem.sentence].sample
-    )
-    puts "Consultation for Patient #{consultation.patient_id} with Doctor #{consultation.doctor_id} seeded."
-  end
-end
+#     # After resolving conflicts, create the consultation
+#     consultation = Consultation.create!(
+#       appointment: appointment_time,
+#       status: Consultation.statuses.keys.sample,  # Randomly assign a status
+#       doctor: doctor,
+#       patient: patient,
+#       is_archived: false,
+#       refus_reason: [nil, Faker::Lorem.sentence].sample
+#     )
+#     puts "Consultation for Patient #{consultation.patient_id} with Doctor #{consultation.doctor_id} seeded."
+#   end
+# end
 
 
 ########################### Seeding Blogs ##################################

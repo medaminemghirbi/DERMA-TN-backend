@@ -24,12 +24,12 @@ class Doctor < User
   has_many :phone_numbers, dependent: :destroy
   has_many :custom_mails
 
-  def daily_limit
+  def limit_callback
     case plan
     when 'no_plan'
       0
     when 'basic'
-      3
+      30
     when 'premium'
       Float::INFINITY
     when 'custom'

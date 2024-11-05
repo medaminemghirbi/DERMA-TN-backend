@@ -7,12 +7,12 @@ class DoctorUsage < ApplicationRecord
 
   # Track daily usage
   def self.track_usage(doctor)
-    usage = find_or_create_by(doctor: doctor, date: Date.today)
+    usage = find_or_create_by(doctor: doctor)
     usage.increment!(:count)
   end
 
   def self.usage_limit_reached?(doctor, limit)
-    usage = find_or_create_by(doctor: doctor, date: Date.today)
+    usage = find_or_create_by(doctor: doctor)
     usage.count >= limit
   end
 end

@@ -12,9 +12,9 @@ img_size = (240, 240)
 
 # Define class names
 class_names = [
-    'Actinic keratosis', 'Atopic Dermatitis', 'Benign keratosis',
+    'Actinic keratosis', 'Basal Cell Carcinoma', 'Benign keratosis',
     'Dermatofibroma', 'Melanocytic nevus', 'Melanoma',
-    'Squamous cell carcinoma', 'Tinea Ringworm Candidiasis', 'Vascular lesion'
+    'Squamous cell carcinoma', 'Vascular lesion'
 ]
 
 def predict_disease(model, img_path):

@@ -5,7 +5,7 @@ class PredictionsController < ApplicationController
     image = params[:file]
     doctor = Doctor.find(params[:doctor_id])
 
-    if DoctorUsage.usage_limit_reached?(doctor, doctor.daily_limit)
+    if DoctorUsage.usage_limit_reached?(doctor, doctor.limit_callback)
       render json: { error: 'limit reached Of Using IA. Please upgrade your plan.' }, status: 403
       return
     end
