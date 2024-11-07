@@ -125,6 +125,7 @@ GEM
       activesupport (>= 6.1)
     i18n (1.14.5)
       concurrent-ruby (~> 1.0)
+    ice_cube (0.17.0)
     io-console (0.7.2)
     irb (1.14.0)
       rdoc (>= 4.0.0)
@@ -254,6 +255,7 @@ DEPENDENCIES
   dotenv-rails
   faker (~> 3.3, >= 3.3.1)
   geocoder
+  ice_cube (~> 0.17.0)
   jwt
   mini_magick
   pg (~> 1.4.3)

@@ -21,6 +21,7 @@ Rails.application.routes.draw do
         namespace :v1 do
           resources :doctors do
             post 'activate_compte', on: :member
+
           end
           resources :patients
           resources :consultations
@@ -80,7 +81,8 @@ Rails.application.routes.draw do
           get 'nearest_doctors', to: 'doctors#nearest'
           
           get 'patient_appointments/:patient_id', to: 'consultations#patient_appointments'
-          
+          get 'doctors/:id/patients', to: 'doctors#show_patients'
+
         end
       end
 

@@ -21,9 +21,14 @@ class Doctor < User
   has_one_attached :avatar
   has_many :blogs, dependent: :destroy
   has_many :consultations, dependent: :destroy
+  has_many :patients, through: :consultations
   has_many :phone_numbers, dependent: :destroy
   has_many :custom_mails
 
+
+  def patients_with_consultations
+    self.patients
+  end
   def limit_callback
     case plan
     when 'no_plan'
