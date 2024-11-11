@@ -1,6 +1,6 @@
 class Consultation < ApplicationRecord
   ## Scopes
-  enum status: { pending: 0, approved: 1, rejected: 2, canceled: 3}
+  enum status: { pending: 0, approved: 1, rejected: 2, canceled: 3, finished: 4}
   enum appointment_type: { onsite: 0, online: 1 }
   
   scope :current, -> { where(is_archived: false) }
@@ -17,7 +17,7 @@ class Consultation < ApplicationRecord
   ## Associations
   belongs_to :doctor, class_name: 'User', foreign_key: 'doctor_id'
   belongs_to :patient, class_name: 'User', foreign_key: 'patient_id'
-
+  has_one :payment, dependent: :destroy
 
   TIME_SLOTS = [
   { time: "09:00" },

@@ -10,6 +10,7 @@ class CreateConsultations < ActiveRecord::Migration[7.0]
       t.string :refus_reason
       t.string :note
       t.string :room_code
+      t.boolean :is_payed, default: false
       t.timestamps
     end
     add_foreign_key :consultations, :users, column: :doctor_id

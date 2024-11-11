@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_11_07_101001) do
+ActiveRecord::Schema[7.0].define(version: 2024_11_11_135658) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -67,6 +67,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_07_101001) do
     t.string "room_code"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "is_payed", default: false
   end
 
   create_table "custom_mails", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -137,6 +138,15 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_07_101001) do
     t.index ["consultation_id"], name: "index_notifications_on_consultation_id"
   end
 
+  create_table "payments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "consultation_id", null: false
+    t.string "payment_id"
+    t.integer "status", default: 0
+    t.integer "amount"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "phone_numbers", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "doctor_id", null: false
     t.string "number", null: false
@@ -185,6 +195,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_07_101001) do
     t.boolean "is_smsable", default: true
     t.boolean "working_saturday", default: false
     t.boolean "working_on_line", default: false
+    t.integer "amount"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

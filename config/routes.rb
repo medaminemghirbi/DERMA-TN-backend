@@ -42,7 +42,7 @@ Rails.application.routes.draw do
               put 'working_saturday', to: 'users#working_saturday'
               put 'sms_notifications', to: 'users#sms_notifications'
               put 'working_online', to: 'users#working_online'
-
+              put 'update_wallet_amount', to: 'users#update_wallet_amount'
             end
           end  
           get 'messages/:message_id/images/:image_id', to: 'messages#download_image'
@@ -82,6 +82,10 @@ Rails.application.routes.draw do
           
           get 'patient_appointments/:patient_id', to: 'consultations#patient_appointments'
           get 'doctors/:id/patients', to: 'doctors#show_patients'
+
+
+          post 'payments/generate', to: 'payments#create_payment'
+          get 'payments/verify', to: 'payments#verify_payment'
 
         end
       end
