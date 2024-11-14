@@ -52,9 +52,10 @@ group :development do
   # gem "spring"
 end
 
+gem 'ice_cube', '~> 0.17.0'
 
 gem "dockerfile-rails", ">= 1.6", :group => :development
-
+gem 'standard', require: false
 gem "redis", "~> 5.3"
 
 gem "aws-sdk-s3", "~> 1.167", :require => false

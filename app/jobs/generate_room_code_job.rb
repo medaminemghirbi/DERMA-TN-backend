@@ -7,6 +7,7 @@ class GenerateRoomCodeJob < ApplicationJob
         consultation.generate_room_code
         consultation.save!
         NotificationMailer.send_room_code(consultation.doctor, consultation.patient, consultation.room_code).deliver_later
+
       end
     end
   end

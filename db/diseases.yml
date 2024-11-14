@@ -1,4 +1,4 @@
-- maladie_name: "Actinic Keratosis"
+- maladie_name: "Actinic keratosis"
   maladie_description: "Actinic keratosis is a precancerous skin condition caused by prolonged exposure to ultraviolet (UV) light. It typically appears as a rough, scaly patch on sun-exposed areas of the skin."
   synonyms: "Solar Keratosis"
   symptoms: "Rough, scaly patches on sun-exposed skin"
@@ -22,7 +22,7 @@
   image_path: "Basal cell Carcinoma.png"
   is_cancer: true
 
-- maladie_name: "Benign Keratosis"
+- maladie_name: "Benign keratosis"
   maladie_description: "Benign keratosis refers to a non-cancerous growth on the skin. These can include various types of skin lesions such as seborrheic keratoses, which appear as waxy, raised bumps on the skin."
   synonyms: "Seborrheic Keratosis"
   symptoms: "Waxy, raised bumps on the skin"
@@ -46,7 +46,7 @@
   image_path: "Dermatofibroma.png"
   is_cancer: false
 
-- maladie_name: "Melanocytic Nevus"
+- maladie_name: "Melanocytic nevus"
   maladie_description: "Melanocytic nevus, commonly known as a mole, is a benign growth on the skin that arises from melanocytes (cells that produce pigment). It can vary in color from light brown to black and is typically round or oval in shape."
   synonyms: "Mole"
   symptoms: "Pigmented spot or mole"
@@ -70,7 +70,7 @@
   image_path: "Melanoma.png"
   is_cancer: true
 
-- maladie_name: "Squamous Cell Carcinoma"
+- maladie_name: "Squamous cell carcinoma"
   maladie_description: "Squamous cell carcinoma is a type of skin cancer that originates from squamous cells in the epidermis. It can appear as a red, scaly patch or a sore that doesn’t heal and may spread if not treated promptly."
   synonyms: "SCC"
   symptoms: "Red, scaly patch, sore that doesn’t heal"
@@ -82,7 +82,7 @@
   image_path: "Squamous Cell Carcinoma.png"
   is_cancer: true
 
-- maladie_name: "Vascular Lesion"
+- maladie_name: "Vascular lesion"
   maladie_description: "Vascular lesions are abnormal growths or malformations of blood vessels in the skin or other tissues. They can include conditions such as hemangiomas, port-wine stains, and telangiectasias, and may appear as red or purple spots on the skin."
   synonyms: "Vascular Malformations"
   symptoms: "Red or purple spots or lesions"
