@@ -2,7 +2,6 @@
 class DoctorUsage < ApplicationRecord
   belongs_to :doctor
 
-  validates :date, uniqueness: { scope: :doctor_id }
   scope :current, -> { where(is_archived: false) }
 
   # Track daily usage

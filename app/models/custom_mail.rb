@@ -6,12 +6,13 @@ class CustomMail < ApplicationRecord
   after_create_commit { broadcast_notification }
 
   private
+
   def broadcast_notification
-    ActionCable.server.broadcast('MailChannel', {
-      id: self.id,
-      subject: self.subject,
-      body: self.body,
-      sent_at: self.sent_at
+    ActionCable.server.broadcast("MailChannel", {
+      id: id,
+      subject: subject,
+      body: body,
+      sent_at: sent_at
     })
   end
 end

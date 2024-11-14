@@ -21,7 +21,7 @@ class WeeksController < ApplicationController
     # Exclude Sundays and generate dates for the next year
     schedule.occurrences(Date.current.end_of_year).map do |date|
       # Format the date as 'YYYY-MM-DD' and include the day name
-      { day: date.strftime("%A"), date: date.strftime("%Y-%m-%d") }
+      {day: date.strftime("%A"), date: date.strftime("%Y-%m-%d")}
     end
   end
 end

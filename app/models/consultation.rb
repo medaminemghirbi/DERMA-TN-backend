@@ -1,8 +1,8 @@
 class Consultation < ApplicationRecord
   ## Scopes
-  enum status: { pending: 0, approved: 1, rejected: 2, canceled: 3, finished: 4}
-  enum appointment_type: { onsite: 0, online: 1 }
-  
+  enum status: {pending: 0, approved: 1, rejected: 2, canceled: 3, finished: 4}
+  enum appointment_type: {onsite: 0, online: 1}
+
   scope :current, -> { where(is_archived: false) }
   after_create_commit { broadcast_notification }
 
@@ -15,35 +15,35 @@ class Consultation < ApplicationRecord
   validate :verified_consultation_booked, on: :create
 
   ## Associations
-  belongs_to :doctor, class_name: 'User', foreign_key: 'doctor_id'
-  belongs_to :patient, class_name: 'User', foreign_key: 'patient_id'
+  belongs_to :doctor, class_name: "User", foreign_key: "doctor_id"
+  belongs_to :patient, class_name: "User", foreign_key: "patient_id"
   has_one :payment, dependent: :destroy
 
   TIME_SLOTS = [
-  { time: "09:00" },
-  { time: "09:30" },
-  { time: "10:00" },
-  { time: "10:30" },
-  { time: "11:00" },
-  { time: "11:30" },
-  { time: "12:00" },
-  { time: "13:30" },
-  { time: "14:00" },
-  { time: "14:30" },
-  { time: "15:00" },
-  { time: "15:30" },
-  { time: "16:00" }
-]
+    {time: "09:00"},
+    {time: "09:30"},
+    {time: "10:00"},
+    {time: "10:30"},
+    {time: "11:00"},
+    {time: "11:30"},
+    {time: "12:00"},
+    {time: "13:30"},
+    {time: "14:00"},
+    {time: "14:30"},
+    {time: "15:00"},
+    {time: "15:30"},
+    {time: "16:00"}
+  ]
   def generate_room_code
     self.room_code = loop do
       random_code = SecureRandom.alphanumeric(8).upcase
       break random_code unless Consultation.exists?(room_code: random_code)
     end
   end
-  def within_60_minutes_before_appointment?
-    Time.current >= (self.appointment - 60.minutes) && Time.current < self.appointment
-  end
 
+  def within_60_minutes_before_appointment?
+    Time.current >= (appointment - 60.minutes) && Time.current < appointment
+  end
 
   private
 
@@ -53,17 +53,15 @@ class Consultation < ApplicationRecord
     end
   end
 
-
   def broadcast_notification
-    ActionCable.server.broadcast('ConsultationChannel', {
-      id: self.id,
-      appointment: self.appointment,
-      status: self.status,
-      doctor_id: self.doctor_id,
-      patient_id: self.patient_id,
-      refus_reason: self.refus_reason,
+    ActionCable.server.broadcast("ConsultationChannel", {
+      id: id,
+      appointment: appointment,
+      status: status,
+      doctor_id: doctor_id,
+      patient_id: patient_id,
+      refus_reason: refus_reason
 
     })
   end
-
 end

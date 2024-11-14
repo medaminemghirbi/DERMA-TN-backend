@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_11_11_135658) do
+ActiveRecord::Schema[7.0].define(version: 2024_11_11_123818) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -65,9 +65,10 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_11_135658) do
     t.string "refus_reason"
     t.string "note"
     t.string "room_code"
+    t.integer "order", default: 1
+    t.boolean "is_payed", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.boolean "is_payed", default: false
   end
 
   create_table "custom_mails", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -83,7 +84,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_11_135658) do
 
   create_table "doctor_usages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "doctor_id", null: false
-    t.date "date", null: false
     t.integer "count", default: 0
     t.boolean "is_archived", default: false
   end
@@ -92,6 +92,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_11_135658) do
     t.string "title"
     t.uuid "doctor_id", null: false
     t.boolean "is_archived", default: false
+    t.integer "order", default: 1
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -133,6 +134,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_11_135658) do
     t.uuid "consultation_id"
     t.string "status"
     t.datetime "received_at"
+    t.integer "order", default: 1
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["consultation_id"], name: "index_notifications_on_consultation_id"
@@ -153,6 +155,7 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_11_135658) do
     t.string "phone_type", null: false
     t.boolean "is_archived", default: false
     t.boolean "is_primary", default: false
+    t.integer "order", default: 1
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -168,8 +171,8 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_11_135658) do
     t.string "password_reset_token"
     t.datetime "password_reset_sent_at"
     t.date "birthday"
-    t.integer "gender"
-    t.integer "civil_status"
+    t.integer "gender", default: 0
+    t.integer "civil_status", default: 0
     t.boolean "is_archived", default: false
     t.integer "order", default: 1
     t.string "type"
@@ -177,7 +180,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_11_135658) do
     t.string "specialization"
     t.float "latitude"
     t.float "longitude"
-    t.string "google_maps_url"
     t.string "description"
     t.string "code_doc"
     t.string "website"

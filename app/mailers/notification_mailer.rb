@@ -6,17 +6,17 @@ class NotificationMailer < ApplicationMailer
     @room_code = room_code
 
     # Prepare email subject and body
-    email_subject = 'Your Consultation Room Link'
+    email_subject = "Your Consultation Room Link"
     email_body = "Hello,<br>Your consultation room link is: <strong><a href='http://localhost:4200/live/#{@room_code}'>Join Consultation</a></strong><br>Best regards,<br> Doc Pro System"
 
     # Send email to patient
     mail(to: @patient.email, subject: email_subject) do |format|
-      format.html { render 'send_room_code' }
+      format.html { render "send_room_code" }
     end
 
     # Send email to doctor
     mail(to: @doctor.email, subject: email_subject) do |format|
-      format.html { render 'send_room_code' }
+      format.html { render "send_room_code" }
     end
 
     # Track sent email in the database
@@ -25,7 +25,7 @@ class NotificationMailer < ApplicationMailer
       patient_id: @patient.id,
       subject: email_subject,
       body: email_body,
-      status: 'sent',
+      status: "sent",
       sent_at: Time.current
     )
 
@@ -35,7 +35,7 @@ class NotificationMailer < ApplicationMailer
       patient_id: @patient.id,
       subject: email_subject,
       body: email_body,
-      status: 'sent',
+      status: "sent",
       sent_at: Time.current
     }
   end

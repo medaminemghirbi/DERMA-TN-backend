@@ -1,5 +1,5 @@
-require 'net/http'
-require 'uri'
+require "net/http"
+require "uri"
 
 class Api::V1::PaymentsController < ApplicationController
   def create_payment
@@ -33,12 +33,12 @@ class Api::V1::PaymentsController < ApplicationController
       )
 
       # Render the URL as response and start async verification
-      render json: { url: payment_url }
+      render json: {url: payment_url}
 
       # Trigger asynchronous verification
       verify_payment_async(payment_id)
     else
-      render json: { error: "Failed to generate payment URL" }, status: :unprocessable_entity
+      render json: {error: "Failed to generate payment URL"}, status: :unprocessable_entity
     end
   end
 
