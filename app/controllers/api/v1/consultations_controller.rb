@@ -169,20 +169,19 @@ class Api::V1::ConsultationsController < ApplicationController
     end
   end
 
- #ON USE THIS TO HANDLE MULTIPLE SEARCH ON DOCTOR FOR SAME NAME OR LOCATION 
+  # ON USE THIS TO HANDLE MULTIPLE SEARCH ON DOCTOR FOR SAME NAME OR LOCATION
   def search_doctors
     query = params[:query]
     cache_key = "doctor_search/#{query}"
-  
+
     # Try to fetch from cache
     doctors = Rails.cache.fetch(cache_key, expires_in: 2.minutes) do
-      Doctor.where('firstname ILIKE :query OR location ILIKE :query', query: "%#{query}%")
-            .includes(:phone_numbers)
-            .as_json(only: [:id, :firstname, :lastname  ], include: :phone_numbers)
+      Doctor.where("firstname ILIKE :query OR location ILIKE :query", query: "%#{query}%")
+        .includes(:phone_numbers)
+        .as_json(only: [:id, :firstname, :lastname], include: :phone_numbers)
     end
     render json: doctors
   end
-  
 
   private
 

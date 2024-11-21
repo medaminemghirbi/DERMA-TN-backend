@@ -43,7 +43,6 @@ Rails.application.routes.draw do
           put "working_online", to: "users#working_online"
           put "update_wallet_amount", to: "users#update_wallet_amount"
           put "changeLanguage", to: "users#changeLanguage"
-
         end
       end
       get "messages/:message_id/images/:image_id", to: "messages#download_image"
@@ -87,7 +86,6 @@ Rails.application.routes.draw do
       get "payments/verify", to: "payments#verify_payment"
       get "get_defaut_language/:user_id", to: "users#get_defaut_language"
       get "search_doctors/:query", to: "consultations#search_doctors"
-
     end
   end
 

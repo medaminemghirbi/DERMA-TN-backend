@@ -130,16 +130,16 @@ class Api::V1::UsersController < ApplicationController
       }, status: :unprocessable_entity
     end
   end
+
   def get_defaut_language
     @user = User.current.find_by(id: params[:user_id]) # Use `find_by` to fetch a single user
     if @user
-      render json: { language: @user.language }
+      render json: {language: @user.language}
     else
-      render json: { error: 'User not found' }, status: :not_found
+      render json: {error: "User not found"}, status: :not_found
     end
   end
-  
-  
+
   def update_wallet_amount
     @user = User.find(params[:id])
     if @user.update(amount: params[:amount])
