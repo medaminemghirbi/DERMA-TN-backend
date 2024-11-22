@@ -79,7 +79,7 @@ class Api::V1::ConsultationsController < ApplicationController
   end
 
   def patient_appointments
-    @consultations = Consultation.current.where(patient_id: params[:patient_id])
+    @consultations = Consultation.current.where(patient_id: params[:patient_id]).order(appointment: :asc)
     render json: @consultations, include: {
       doctor: {
         methods: [:user_image_url],
@@ -167,6 +167,20 @@ class Api::V1::ConsultationsController < ApplicationController
     else
       render json: {error: "Consultation with the specified room code does not exist."}, status: :unprocessable_entity
     end
+  end
+
+  # ON USE THIS TO HANDLE MULTIPLE SEARCH ON DOCTOR FOR SAME NAME OR LOCATION
+  def search_doctors
+    query = params[:query]
+    cache_key = "doctor_search/#{query}"
+
+    # Try to fetch from cache
+    doctors = Rails.cache.fetch(cache_key, expires_in: 2.minutes) do
+      Doctor.where("firstname ILIKE :query OR location ILIKE :query", query: "%#{query}%")
+        .includes(:phone_numbers)
+        .as_json(only: [:id, :firstname, :lastname], include: :phone_numbers)
+    end
+    render json: doctors
   end
 
   private

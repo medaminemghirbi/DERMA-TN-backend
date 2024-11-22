@@ -42,6 +42,7 @@ Rails.application.routes.draw do
           put "sms_notifications", to: "users#sms_notifications"
           put "working_online", to: "users#working_online"
           put "update_wallet_amount", to: "users#update_wallet_amount"
+          put "changeLanguage", to: "users#changeLanguage"
         end
       end
       get "messages/:message_id/images/:image_id", to: "messages#download_image"
@@ -83,6 +84,8 @@ Rails.application.routes.draw do
 
       post "payments/generate", to: "payments#create_payment"
       get "payments/verify", to: "payments#verify_payment"
+      get "get_defaut_language/:user_id", to: "users#get_defaut_language"
+      get "search_doctors/:query", to: "consultations#search_doctors"
     end
   end
 

@@ -118,6 +118,28 @@ class Api::V1::UsersController < ApplicationController
     end
   end
 
+  def changeLanguage
+    @user = User.find(params[:id])
+
+    if @user.update(language: params[:language])
+      render json: @user, methods: [:user_image_url]
+    else
+      render json: {
+        status: 422,
+        errors: @user.errors.full_messages  # Use @user.errors directly instead of @user.user_setting.errors
+      }, status: :unprocessable_entity
+    end
+  end
+
+  def get_defaut_language
+    @user = User.current.find_by(id: params[:user_id]) # Use `find_by` to fetch a single user
+    if @user
+      render json: {language: @user.language}
+    else
+      render json: {error: "User not found"}, status: :not_found
+    end
+  end
+
   def update_wallet_amount
     @user = User.find(params[:id])
     if @user.update(amount: params[:amount])
