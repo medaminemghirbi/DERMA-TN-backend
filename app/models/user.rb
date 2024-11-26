@@ -28,6 +28,20 @@ class User < ApplicationRecord
     # Get the URL of the associated image
     avatar.attached? ? url_for(avatar) : nil
   end
+
+  def validate_confirmation_code(code)
+    if confirmation_code == code
+        update(email_confirmed: true, confirmation_code: nil, confirmation_code_generated_at: nil )
+        true
+    else
+        false
+    end
+  end
+
+  def confirmation_code_expired?
+    confirmation_code_generated_at.nil? || (Time.current > (confirmation_code_generated_at + 5.minute))
+  end
+
   private
 
 

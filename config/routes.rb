@@ -89,5 +89,15 @@ Rails.application.routes.draw do
     end
   end
 
+  namespace :api do
+    namespace :mobile do
+      resources :registrations, only: [:create] do
+        collection do
+          post :confirm_email
+        end
+      end
+      
+    end
+  end
   # resources :users
 end

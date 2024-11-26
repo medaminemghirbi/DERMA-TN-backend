@@ -68,7 +68,7 @@ class Api::V1::ConsultationsController < ApplicationController
 
   # GET /consultations/doctor_appointments
   def doctor_appointments
-    @consultations = Consultation.current.where(doctor_id: params[:doctor_id])
+    @consultations = Consultation.current.where(doctor_id: params[:doctor_id]).order(appointment: :asc)
     render json: @consultations, include: {
       doctor: {
         methods: [:user_image_url],
@@ -78,7 +78,7 @@ class Api::V1::ConsultationsController < ApplicationController
     }
   end
 
-  def patient_appointments
+  def patient_appointments 
     @consultations = Consultation.current.where(patient_id: params[:patient_id]).order(appointment: :asc)
     render json: @consultations, include: {
       doctor: {
