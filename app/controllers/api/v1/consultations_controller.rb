@@ -78,7 +78,7 @@ class Api::V1::ConsultationsController < ApplicationController
     }
   end
 
-  def patient_appointments 
+  def patient_appointments
     @consultations = Consultation.current.where(patient_id: params[:patient_id]).order(appointment: :asc)
     render json: @consultations, include: {
       doctor: {

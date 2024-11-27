@@ -96,7 +96,6 @@ Rails.application.routes.draw do
           post :confirm_email
         end
       end
-      
     end
   end
   # resources :users
