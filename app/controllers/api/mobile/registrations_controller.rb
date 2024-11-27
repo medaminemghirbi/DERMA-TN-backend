@@ -35,7 +35,9 @@ class Api::Mobile::RegistrationsController < ApplicationController
         if user.save
         UserMailer.confirmation_email(user).deliver
         session[:user_id] = user.id
-        render json: { status: :created, user: user }
+        render json: { status: 200, user: user,
+        message: "Account created successfully.",
+        type: user.class.name }
         else
         render json: { status: 500, errors: user.errors.full_messages }
         end
