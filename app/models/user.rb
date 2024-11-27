@@ -3,10 +3,10 @@ class User < ApplicationRecord
   enum gender: [:male, :female]
   enum civil_status: [:Mr, :Mrs, :Mme, :other]
   encrypts :email, deterministic: true
-  ##scopes
+  # #scopes
   scope :current, -> { where(is_archived: false) }
 
-  ##Includes
+  # #Includes
   include Rails.application.routes.url_helpers
 
   ## Callbacks
@@ -22,15 +22,27 @@ class User < ApplicationRecord
   ## Associations
   has_one_attached :avatar, dependent: :destroy
   has_many :phone_numbers, dependent: :destroy
-  has_many :sent_messages, class_name: 'Message'
-  has_many :received_messages, class_name: 'Message'
+  has_many :sent_messages, class_name: "Message"
+  has_many :received_messages, class_name: "Message"
   def user_image_url
     # Get the URL of the associated image
     avatar.attached? ? url_for(avatar) : nil
   end
+
+  def validate_confirmation_code(code)
+    if confirmation_code == code
+      update(email_confirmed: true, confirmation_code: nil, confirmation_code_generated_at: nil)
+      true
+    else
+      false
+    end
+  end
+
+  def confirmation_code_expired?
+    confirmation_code_generated_at.nil? || (Time.current > (confirmation_code_generated_at + 5.minute))
+  end
+
   private
-
-
 
   def email_activate
     self.email_confirmed = true
@@ -50,19 +62,19 @@ class User < ApplicationRecord
 
   # This generates a random password reset token for the user
   def generate_token(column)
-    begin
+    loop do
       self[column] = SecureRandom.urlsafe_base64
-    end while User.exists?(column => self[column])
+      break unless User.exists?(column => self[column])
+    end
   end
+
   def generate_code_doc
     current_year = Time.now.year
     # Get the first two characters of the first and last name
-    first_two_firstname = self.firstname[0,2].capitalize
-    first_two_lastname = self.lastname[0,2].capitalize
+    first_two_firstname = firstname[0, 2].capitalize
+    first_two_lastname = lastname[0, 2].capitalize
 
     # Generate the new code
     self.code_doc = "Dr-#{first_two_firstname}-#{first_two_lastname}-#{current_year}"
   end
-  
-
 end
