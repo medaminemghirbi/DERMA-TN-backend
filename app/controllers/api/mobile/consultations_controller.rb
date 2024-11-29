@@ -11,7 +11,12 @@ class Api::Mobile::ConsultationsController < ApplicationController
     ).sort_by(&:appointment)
 
     render json: @consultations.as_json(include: {
-      doctor: {methods: [:user_image_url]}
+      doctor: {
+        methods: [:user_image_url_mobile],
+        include: {
+          phone_numbers: { only: [:number] } # Include the phone number data
+        }
+      }
     }).map do |consultation|
       consultation.merge(
         appointment: consultation["appointment"].strftime("%Y-%m-%d %H:%M:%S")

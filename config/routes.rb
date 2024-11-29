@@ -99,6 +99,8 @@ Rails.application.routes.draw do
         end
       end
       get "patient_consultations_today/:patient_id", to: "consultations#patient_consultations_today"
+      get "doctor_list/:location", to: "doctors#nearest"
+
     end
   end
   # resources :users

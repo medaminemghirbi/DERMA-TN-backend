@@ -16,7 +16,7 @@ class Api::V1::BlogsController < ApplicationController
   end
   
   def verified_blogs
-    blogs = Blog.where(is_verified:true).order(:order).current.includes(:doctor, :maladie).as_json(
+    blogs = Blog.current.verified.order(:order).current.includes(:doctor, :maladie).as_json(
       methods: [:image_urls],
       include: {
         doctor: {
