@@ -1,6 +1,7 @@
 
 class Api::Mobile::ConsultationsController < ApplicationController
   before_action :authorize_request
+  before_action :set_consultation, only: [:destroy]
   def patient_consultations_today
     today = Date.current
 
@@ -23,4 +24,39 @@ class Api::Mobile::ConsultationsController < ApplicationController
       )
     end
   end
+
+  def patient_appointments
+    page = params[:page] || 1
+    per_page = params[:per_page] || 10
+    @consultations = Consultation.current
+                                .where(patient_id: params[:patient_id])
+                                .page(page)
+                                .per(per_page)
+                                .order(appointment: :asc)
+    render json: @consultations, include: {
+      doctor: {
+        only: [:firstname, :lastname, :address,:latitude,:longitude], methods: [:first_number, :user_image_url_mobile]
+      },
+      patient: { only: [:firstname, :lastname] }
+    }
+  end
+
+  def destroy
+    if @consultation.status == "pending"
+      if @consultation.update(is_archived: true)
+        render json: { message: "Consultation Deleted successfully." }, status: 200
+      else
+        render json: { error: "Failed to archive consultation." }, status: :unprocessable_entity
+      end
+    else
+      render json: { error: "You can't delete this consultation." }, status: :unprocessable_entity
+    end
+  end
+  
+
+  private
+  def set_consultation
+    @consultation = Consultation.find(params[:id])
+  end
+
 end

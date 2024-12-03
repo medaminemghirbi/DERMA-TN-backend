@@ -15,7 +15,7 @@ class Api::Mobile::DoctorsController < ApplicationController
 
     if coordinates
       @doctors = Doctor.near(coordinates, radius, units: :km)
-      render json: @doctors, methods: [:user_image_url]
+      render json: @doctors, methods: [:user_image_url_mobile]
     else
       render json: {error: "Location not found"}, status: :unprocessable_entity
     end
