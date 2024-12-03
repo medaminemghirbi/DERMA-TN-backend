@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_11_26_091159) do
+ActiveRecord::Schema[7.0].define(version: 2024_11_29_102530) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -160,6 +160,16 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_26_091159) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "reactions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.uuid "blog_id", null: false
+    t.integer "reaction_type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["blog_id"], name: "index_reactions_on_blog_id"
+    t.index ["user_id"], name: "index_reactions_on_user_id"
+  end
+
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "email"
     t.string "password_digest"
@@ -212,4 +222,6 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_26_091159) do
   add_foreign_key "doctor_usages", "users", column: "doctor_id"
   add_foreign_key "documents", "users", column: "doctor_id"
   add_foreign_key "phone_numbers", "users", column: "doctor_id"
+  add_foreign_key "reactions", "blogs"
+  add_foreign_key "reactions", "users"
 end

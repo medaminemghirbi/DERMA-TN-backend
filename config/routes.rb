@@ -54,6 +54,8 @@ Rails.application.routes.draw do
       get "getAllEmails/:type/:id", to: "custom_mails#get_all_emails_doctor"
 
       get "doctor_consultations_today/:doctor_id", to: "consultations#doctor_consultations_today"
+
+      
       get "doctor_appointments/:doctor_id", to: "consultations#doctor_appointments"
       get "consultations/available_seances/:doctor_id", to: "consultations#available_seances_for_year"
       get "doctor_consultations/:doctor_id", to: "consultations#doctor_consultations"
@@ -96,6 +98,11 @@ Rails.application.routes.draw do
           post :confirm_email
         end
       end
+      get "patient_consultations_today/:patient_id", to: "consultations#patient_consultations_today"
+      get "doctor_list/:location", to: "doctors#nearest"
+      get "patient_appointments/:patient_id", to: "consultations#patient_appointments"
+      delete "archive_consultation/:id", to: "consultations#destroy"
+
     end
   end
   # resources :users

@@ -217,7 +217,8 @@ class Api::V1::ConsultationsController < ApplicationController
       appointment: @consultation.appointment,
       doctor_id: @consultation.doctor_id,
       patient_id: @consultation.patient_id
-    ).exists?
+    ).where("DATE(appointment) = ?", @consultation.appointment.to_date)
+    .exists?
   end
 
   def consultation_with_other_doctor?
