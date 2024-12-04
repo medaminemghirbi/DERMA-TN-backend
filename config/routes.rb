@@ -102,6 +102,7 @@ Rails.application.routes.draw do
       get "doctor_list/:location", to: "doctors#nearest"
       get "patient_appointments/:patient_id", to: "consultations#patient_appointments"
       delete "archive_consultation/:id", to: "consultations#destroy"
+      get "get_selected_doctor/:id", to: "doctors#get_selected_doctor"
 
     end
   end

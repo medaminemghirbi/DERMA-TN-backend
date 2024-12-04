@@ -20,4 +20,9 @@ class Api::Mobile::DoctorsController < ApplicationController
       render json: {error: "Location not found"}, status: :unprocessable_entity
     end
   end
+
+  def get_selected_doctor
+    @doctor = Doctor.find(params[:id])
+    render json: @doctor, methods: [:user_image_url_mobile]
+  end
 end
