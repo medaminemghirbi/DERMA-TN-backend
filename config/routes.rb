@@ -103,7 +103,10 @@ Rails.application.routes.draw do
       get "patient_appointments/:patient_id", to: "consultations#patient_appointments"
       delete "archive_consultation/:id", to: "consultations#destroy"
       get "get_selected_doctor/:id", to: "doctors#get_selected_doctor"
-
+      put 'set_app_config', to: 'app_configs#set_app_config'
+      post "sessions", to: "sessions#sign_in_mobile"
+      post "create_demande", to: "consultations#add_new_demande"
+      resources :messages
     end
   end
   # resources :users
