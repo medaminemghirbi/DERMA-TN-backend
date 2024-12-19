@@ -6,22 +6,29 @@ class Message < ApplicationRecord
   has_many_attached :images, dependent: :destroy
 
   def message_image_urls
+    
     images.map do |image|
+      image_url = Rails.application.routes.url_helpers.rails_blob_url(image, only_path: false)
+      host = AppConfig.find_by(key: "mobile")&.value || "localhost:3000"
+      image_url = image_url.gsub("localhost:3000", host)  
       {
         id: image.id,
-        url: url_for(image)
+        url: image_url
       }
     end
   end
   private
 
   def broadcast_message
+    host = AppConfig.find_by(key: "mobile")&.value || "localhost:3000"
+    modified_user_image_url = self.sender.user_image_url.gsub("localhost:3000", host)
+  
     ActionCable.server.broadcast('MessagesChannel', {
       id: self.id,
       body: self.body,
       sender_id: self.sender_id,
       sender: {
-        user_image_url: self.sender.user_image_url,
+        user_image_url: modified_user_image_url,
         firstname: self.sender.firstname,
         lastname: self.sender.lastname
       },

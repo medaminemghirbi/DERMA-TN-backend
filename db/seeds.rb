@@ -7,6 +7,9 @@ require "json"
 
 puts "Seeding data..."
 
+## SEEDING CONFIG FOR MOBILE API ### SET VALUE TO "" cause will be updated
+AppConfig.create(key: "mobile", value: "")
+
 ########################### Seeding Admin ##################################
 admin_avatar_url = "https://thumbs.dreamstime.com/b/admin-reliure-de-bureau-sur-le-bureau-en-bois-sur-la-table-crayon-color%C3%A9-79046621.jpg"
 uri = URI.parse(admin_avatar_url)

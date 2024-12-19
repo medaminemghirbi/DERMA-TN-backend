@@ -54,8 +54,9 @@ class Doctor < User
   end
 
   def user_image_url_mobile
-    # Get the URL of the associated image
+    return nil unless avatar.attached? 
     image_url = Rails.application.routes.url_helpers.rails_blob_url(avatar, only_path: false)
-    image_url.gsub("localhost:3000", "192.168.1.18:3000")
+    host = AppConfig.find_by(key: "mobile")&.value || "localhost:3000"
+    image_url.gsub("localhost:3000", host)
   end
 end
