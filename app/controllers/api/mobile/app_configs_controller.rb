@@ -8,7 +8,7 @@ class Api::Mobile::AppConfigsController < ApplicationController
     client_ip = Socket.ip_address_list.detect(&:ipv4_private?).ip_address
 
     #Rails port
-    port =  "3000"
+    port =  "3001"
     #Combine format  Like "192.168.1.xx:3000"
     host_value = "#{client_ip}:#{port}"
     if host_value.present?

@@ -20,15 +20,12 @@ class Message < ApplicationRecord
   private
 
   def broadcast_message
-    host = AppConfig.find_by(key: "mobile")&.value || "localhost:3000"
-    modified_user_image_url = self.sender.user_image_url.gsub("localhost:3000", host)
-  
     ActionCable.server.broadcast('MessagesChannel', {
       id: self.id,
       body: self.body,
       sender_id: self.sender_id,
       sender: {
-        user_image_url: modified_user_image_url,
+        user_image_url: self.sender.user_image_url_mobile,
         firstname: self.sender.firstname,
         lastname: self.sender.lastname
       },
