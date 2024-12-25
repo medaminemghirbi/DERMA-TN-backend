@@ -7,7 +7,7 @@ require "json"
 
 puts "Seeding data..."
 
-## SEEDING CONFIG FOR MOBILE API ### SET VALUE TO "" cause will be updated
+## SEEDING CONFIG FOR MOBILE API ### SET VALUE TO "" cause will be updated 
 AppConfig.create(key: "mobile", value: "")
 
 ########################### Seeding Admin ##################################
