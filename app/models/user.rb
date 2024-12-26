@@ -12,6 +12,7 @@ class User < ApplicationRecord
   ## Callbacks
   before_create :confirmation_token
   before_save :generate_code_doc
+  before_create :attach_avatar_based_on_gender
 
   ## Validations
   has_secure_password
@@ -49,6 +50,14 @@ class User < ApplicationRecord
   end
 
   private
+
+  def attach_avatar_based_on_gender
+    if male?
+      avatar.attach(io: File.open(Rails.root.join("app", "assets", "images", "default_avatar.png")), filename: "default_avatar.png", content_type: "image/png")
+    else
+      avatar.attach(io: File.open(Rails.root.join("app", "assets", "images", "default_female_avatar.png")), filename: "default_female_avatar.png", content_type: "image/png")
+    end
+  end
 
   def email_activate
     self.email_confirmed = true
