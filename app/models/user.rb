@@ -2,7 +2,7 @@ class User < ApplicationRecord
   self.table_name = "users"
   enum gender: [:male, :female]
   enum civil_status: [:Mr, :Mrs, :Mme, :other]
-  encrypts :email, deterministic: true
+  #encrypts :email, deterministic: true
   # #scopes
   scope :current, -> { where(is_archived: false) }
 
