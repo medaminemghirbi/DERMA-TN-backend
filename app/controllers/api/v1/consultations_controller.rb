@@ -240,11 +240,22 @@ class Api::V1::ConsultationsController < ApplicationController
       DemandeMailer.send_mail_demande(@patient, consultation).deliver
     end
     if @doctor.is_notifiable
+      # Save the notification to the database
+      notification = Notification.create!(
+        doctor_id: consultation.doctor.id,
+        patient_id: consultation.patient.id,
+        status: consultation.status,
+        received_at: Time.current
+      )
+    
+      # Broadcast the notification using ActionCable
       ActionCable.server.broadcast "ConsultationChannel", {
         consultation: consultation,
-        status: consultation.status
+        status: consultation.status,
+        notification_id: notification.id
       }
     end
+    
     if @patient.is_notifiable
       ActionCable.server.broadcast "ConsultationChannel", {
         consultation: consultation,

@@ -138,13 +138,13 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_09_142715) do
   end
 
   create_table "notifications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "consultation_id"
+    t.uuid "doctor_id"
+    t.uuid "patient_id"
     t.string "status"
     t.datetime "received_at"
     t.integer "order", default: 1
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["consultation_id"], name: "index_notifications_on_consultation_id"
   end
 
   create_table "payments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
