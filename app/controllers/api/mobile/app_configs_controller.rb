@@ -5,8 +5,9 @@ class Api::Mobile::AppConfigsController < ApplicationController
     host_value = params[:host]
     #Local Ip of Server machine
     #client_ip = request.remote_ip
-    client_ip = Socket.ip_address_list.detect(&:ipv4_private?).ip_address
-
+    client_ip = Socket.ip_address_list
+                     .select { |addr| addr.ipv4_private? && !addr.ip_address.start_with?("172.") }
+                     .first&.ip_address
     #Rails port
     port =  "3001"
     #Combine format  Like "192.168.1.xx:3000"

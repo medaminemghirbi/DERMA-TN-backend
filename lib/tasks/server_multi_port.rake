@@ -1,10 +1,10 @@
-require 'net/http'
-require 'uri'
-
 namespace :server do
   desc "Run Rails server on two ports"
   task :multi => :environment do
-    client_ip = Socket.ip_address_list.detect(&:ipv4_private?)&.ip_address
+    client_ip = Socket.ip_address_list
+                     .select { |addr| addr.ipv4_private? && !addr.ip_address.start_with?("172.") }
+                     .first&.ip_address
+
     if client_ip.nil?
       puts "Could not detect a valid private IP address. Please check your network."
       exit(1)
