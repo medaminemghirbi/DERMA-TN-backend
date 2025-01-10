@@ -184,15 +184,6 @@ class Api::V1::ConsultationsController < ApplicationController
   end
 
   private
-
-  def check_request_date?
-    request_date = params[:appointment]
-    if request_date.present? && request_date.to_date < Date.today
-      return true
-    end
-    false
-  end
-
   def set_consultation
     @consultation = Consultation.find(params[:id])
   end
@@ -205,6 +196,15 @@ class Api::V1::ConsultationsController < ApplicationController
 
   def valid_status?(status)
     %w[pending rejected approved canceled].include?(status)
+  end
+
+
+  def check_request_date?
+    request_date = params[:appointment]
+    if request_date.present? && request_date.to_date < Date.today
+      return true
+    end
+    false
   end
 
   def holiday_exists?
@@ -256,18 +256,19 @@ class Api::V1::ConsultationsController < ApplicationController
   def handle_sms(patient_id, doctor_id, consultation)
     @doctor = User.find(doctor_id)
     @patient = User.find(patient_id)
-
-    if @doctor.is_smsable && @patient.is_smsable
-      message = "Your request with doctor has been accepted. Check your account."
-
-      # Create instances of SmsSender for both the doctor and patient
-      sms_sender_to_patient = Twilio::SmsSender.new(body: message, to_phone_number: @patient.phone_number)
-
+  
+    if @patient.is_smsable
+      message = "Your request with the doctor has been accepted. Check your account."
+  
+      sms_sender_to_patient = Twilio::SmsSender.new(
+        body: message,
+        to_phone_number: @patient.phone_number
+      )
+  
       begin
         sms_sender_to_patient.send_sms
-        sms_sender_to_doctor.send_sms
       rescue => e
-        puts "Error sending SMS: #{e.message}"
+        Rails.logger.error("Error sending SMS to patient: #{e.message}")
       end
     end
   end

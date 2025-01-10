@@ -44,6 +44,33 @@ class Doctor < User
     end
   end
 
+  def remaining_tries
+    current_usage = doctor_usage&.count || 0
+    case plan
+    when "no_plan"
+      0
+    when "basic"
+      [30 - current_usage, 0].max
+    when "premium"
+      Float::INFINITY # Premium has unlimited tries
+    when "custom"
+      [custom_limit - current_usage, 0].max
+    else
+      0
+    end
+  end
+  def display_remaining_tries
+    case plan
+    when "premium"
+      "Nombre d'essais illimité" # Unlimited tries for premium
+    when "custom"
+      "Essais restants : #{remaining_tries}" # Custom limit with remaining tries
+    when "basic"
+      "Essais restants : #{remaining_tries}" # Remaining tries for basic plan
+    else
+      "Pas d'essais disponibles"
+    end
+  end
   def user_image_url
     # Get the URL of the associated image
     avatar.attached? ? url_for(avatar) : nil

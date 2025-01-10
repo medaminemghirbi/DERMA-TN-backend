@@ -1,0 +1,10 @@
+class Prediction < ApplicationRecord
+  belongs_to :doctor, class_name: 'User'
+  belongs_to :maladie
+  has_one_attached :report_pdf
+
+  def prediction_url
+    # Get the URL of the associated image using the attached report_pdf
+    report_pdf.attached? ? url_for(report_pdf) : nil
+  end
+end

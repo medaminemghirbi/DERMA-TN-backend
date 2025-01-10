@@ -17,6 +17,9 @@ Rails.application.routes.draw do
     end
   end
   post "predict/:doctor_id", to: "predictions#predict"
+  resources :predictions
+  get "download_file/:id", to: "predictions#download"
+
   namespace :api do
     namespace :v1 do
       resources :doctors do
@@ -42,6 +45,7 @@ Rails.application.routes.draw do
           put "sms_notifications", to: "users#sms_notifications"
           put "working_online", to: "users#working_online"
           put "update_wallet_amount", to: "users#update_wallet_amount"
+          put "update_phone_number", to: "users#update_phone_number"
           put "changeLanguage", to: "users#changeLanguage"
         end
       end

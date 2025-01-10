@@ -151,7 +151,17 @@ class Api::V1::UsersController < ApplicationController
       }, status: :unprocessable_entity
     end
   end
-
+  def update_phone_number
+    @user = User.find(params[:id])
+    if @user.update(phone_number: params[:phone_number])
+      render json: @user, methods: [:user_image_url]
+    else
+      render json: {
+        status: 422,
+        errors: @user.errors.full_messages
+      }, status: :unprocessable_entity
+    end
+  end
   def update_uesr_informations
     @user = User.find(params[:id])
     if @user.update(params_informations_user)
