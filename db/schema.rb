@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_12_09_142715) do
+ActiveRecord::Schema[7.0].define(version: 2025_01_09_101403) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -167,6 +167,16 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_09_142715) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "predictions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "doctor_id", null: false
+    t.string "predicted_class"
+    t.string "probability"
+    t.uuid "maladie_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "download_count", default: 0
+  end
+
   create_table "reactions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "user_id", null: false
     t.uuid "blog_id", null: false
@@ -209,9 +219,9 @@ ActiveRecord::Schema[7.0].define(version: 2024_12_09_142715) do
     t.integer "plan", default: 0
     t.integer "custom_limit", default: 0
     t.integer "radius", default: 1
-    t.boolean "is_emailable", default: true
-    t.boolean "is_notifiable", default: true
-    t.boolean "is_smsable", default: true
+    t.boolean "is_emailable", default: false
+    t.boolean "is_notifiable", default: false
+    t.boolean "is_smsable", default: false
     t.boolean "working_saturday", default: false
     t.boolean "working_on_line", default: false
     t.integer "amount"

@@ -38,9 +38,9 @@ class CreateUsers < ActiveRecord::Migration[7.0]
       t.integer :radius, default: 1
 
       # Add User Settings to avoid tables
-      t.boolean :is_emailable, default: true
-      t.boolean :is_notifiable, default: true
-      t.boolean :is_smsable, default: true
+      t.boolean :is_emailable, default: false
+      t.boolean :is_notifiable, default: false
+      t.boolean :is_smsable, default: false
       t.boolean :working_saturday, default: false
       t.boolean :working_on_line, default: false
       t.integer :amount
