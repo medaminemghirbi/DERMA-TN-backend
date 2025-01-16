@@ -1,7 +1,7 @@
 require "yaml"
 
 class Api::V1::DoctorsController < ApplicationController
-  before_action :authorize_request, except: [:unique_locations]
+  before_action :authorize_request, except: [:unique_locations, :rate_doctor]
   def getDoctorStatistique
     @consultations = Consultation.current.where(doctor_id: params[:doctor_id]).count
     @blogs = Blog.current.where(doctor_id: params[:doctor_id]).count
@@ -148,6 +148,24 @@ class Api::V1::DoctorsController < ApplicationController
     render json: @patients, status: :ok
   end
 
+
+  def rate_doctor
+    @consultation = Consultation.find(params[:consultation_id])
+    @rating = Rating.new(rating_params)
+    @rating.consultation = @consultation
+    if @rating.save
+      render json: @rating
+    else
+      render json: {error: "you already rate this doctor on that consultation"}, status: 800
+    end
+  end
+
+  def check_rating
+    consultation_id = params[:consultation_id]
+    rating_exists = Rating.exists?(consultation_id: consultation_id)
+
+    render json: { ratingExists: rating_exists }
+  end
   private
 
   def paramsimagefreelancer
@@ -160,5 +178,8 @@ class Api::V1::DoctorsController < ApplicationController
 
   def user_params
     params.permit(:password, :newPassword, :confirmPassword, :id)
+  end
+  def rating_params
+    params.permit(:consultation_id, :rating_value, :comment)
   end
 end

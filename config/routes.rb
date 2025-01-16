@@ -56,6 +56,7 @@ Rails.application.routes.draw do
       get "last_run", to: "scrapers#last_run"
       get "code_room_exist", to: "consultations#code_room_exist"
       get "getAllEmails/:type/:id", to: "custom_mails#get_all_emails_doctor"
+      get "deleteAllEmail/:type/:id", to: "custom_mails#delete_all_email"
 
       get "doctor_consultations_today/:doctor_id", to: "consultations#doctor_consultations_today"
 
@@ -87,6 +88,8 @@ Rails.application.routes.draw do
 
       get "patient_appointments/:patient_id", to: "consultations#patient_appointments"
       get "doctors/:id/patients", to: "doctors#show_patients"
+      post "rate_doctor", to: "doctors#rate_doctor"
+      get 'check_rating', to: 'doctors#check_rating'
 
       post "payments/generate", to: "payments#create_payment"
       get "payments/verify", to: "payments#verify_payment"

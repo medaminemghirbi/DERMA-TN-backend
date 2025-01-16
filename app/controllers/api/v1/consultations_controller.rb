@@ -8,6 +8,7 @@ class Api::V1::ConsultationsController < ApplicationController
 
   # POST /consultations
   def create
+    byebug
     @consultation = Consultation.new(consultation_params)
 
     if check_request_date?
@@ -200,13 +201,13 @@ class Api::V1::ConsultationsController < ApplicationController
 
 
   def check_request_date?
-    request_date = params[:appointment]
-    if request_date.present? && request_date.to_date < Date.today
+    request_date = Date.parse(params[:appointment]) if params[:appointment].present?
+    if request_date && request_date < Date.today
       return true
     end
     false
   end
-
+  
   def holiday_exists?
     Holiday.where(holiday_date: @consultation.appointment).exists?
   end
