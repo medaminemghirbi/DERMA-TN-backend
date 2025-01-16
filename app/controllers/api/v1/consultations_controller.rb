@@ -8,7 +8,6 @@ class Api::V1::ConsultationsController < ApplicationController
 
   # POST /consultations
   def create
-    byebug
     @consultation = Consultation.new(consultation_params)
 
     if check_request_date?
@@ -185,6 +184,7 @@ class Api::V1::ConsultationsController < ApplicationController
   end
 
   private
+
   def set_consultation
     @consultation = Consultation.find(params[:id])
   end
@@ -199,7 +199,6 @@ class Api::V1::ConsultationsController < ApplicationController
     %w[pending rejected approved canceled].include?(status)
   end
 
-
   def check_request_date?
     request_date = Date.parse(params[:appointment]) if params[:appointment].present?
     if request_date && request_date < Date.today
@@ -207,7 +206,7 @@ class Api::V1::ConsultationsController < ApplicationController
     end
     false
   end
-  
+
   def holiday_exists?
     Holiday.where(holiday_date: @consultation.appointment).exists?
   end
@@ -219,7 +218,7 @@ class Api::V1::ConsultationsController < ApplicationController
       doctor_id: @consultation.doctor_id,
       patient_id: @consultation.patient_id
     ).where("DATE(appointment) = ?", @consultation.appointment.to_date)
-    .exists?
+      .exists?
   end
 
   def consultation_with_other_doctor?
@@ -257,15 +256,15 @@ class Api::V1::ConsultationsController < ApplicationController
   def handle_sms(patient_id, doctor_id, consultation)
     @doctor = User.find(doctor_id)
     @patient = User.find(patient_id)
-  
+
     if @patient.is_smsable
       message = "Your request with the doctor has been accepted. Check your account."
-  
+
       sms_sender_to_patient = Twilio::SmsSender.new(
         body: message,
         to_phone_number: @patient.phone_number
       )
-  
+
       begin
         sms_sender_to_patient.send_sms
       rescue => e

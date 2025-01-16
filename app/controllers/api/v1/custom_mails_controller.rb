@@ -23,11 +23,10 @@ class Api::V1::CustomMailsController < ApplicationController
     elsif params[:type] == "Patient"
       emails_deleted_count = CustomMail.where(patient_id: params[:id]).delete_all
     else
-      render json: { error: 'Invalid type parameter. Must be "Doctor" or "Patient".' }, status: :unprocessable_entity
+      render json: {error: 'Invalid type parameter. Must be "Doctor" or "Patient".'}, status: :unprocessable_entity
       return
     end
-  
-    render json: { message: "#{emails_deleted_count} emails successfully deleted.", count: emails_deleted_count }
+
+    render json: {message: "#{emails_deleted_count} emails successfully deleted.", count: emails_deleted_count}
   end
-  
 end

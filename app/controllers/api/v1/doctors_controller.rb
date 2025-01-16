@@ -148,7 +148,6 @@ class Api::V1::DoctorsController < ApplicationController
     render json: @patients, status: :ok
   end
 
-
   def rate_doctor
     @consultation = Consultation.find(params[:consultation_id])
     @rating = Rating.new(rating_params)
@@ -164,8 +163,9 @@ class Api::V1::DoctorsController < ApplicationController
     consultation_id = params[:consultation_id]
     rating_exists = Rating.exists?(consultation_id: consultation_id)
 
-    render json: { ratingExists: rating_exists }
+    render json: {ratingExists: rating_exists}
   end
+
   private
 
   def paramsimagefreelancer
@@ -179,6 +179,7 @@ class Api::V1::DoctorsController < ApplicationController
   def user_params
     params.permit(:password, :newPassword, :confirmPassword, :id)
   end
+
   def rating_params
     params.permit(:consultation_id, :rating_value, :comment)
   end
