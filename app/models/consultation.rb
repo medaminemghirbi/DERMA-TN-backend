@@ -18,7 +18,7 @@ class Consultation < ApplicationRecord
   belongs_to :doctor, class_name: "User", foreign_key: "doctor_id"
   belongs_to :patient, class_name: "User", foreign_key: "patient_id"
   has_one :payment, dependent: :destroy
-
+  has_one :rating, dependent: :destroy # if consultation is deleted, the rating is too
   TIME_SLOTS = [
     {time: "09:00"},
     {time: "09:30"},

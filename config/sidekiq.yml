@@ -11,3 +11,7 @@
       description: 'Update Consultation Status to finished after 12 hours of appointment date'
       queue: default
       cron: '*/1 * * * *'  # Runs every minute
+    VerifyPaymentJob:
+      description: 'Update Payment Status'
+      queue: default
+      cron: '*/1 * * * *'  # Runs every minute

@@ -24,7 +24,7 @@ class Doctor < User
   has_many :patients, through: :consultations
   has_many :phone_numbers, dependent: :destroy
   has_many :custom_mails
-
+  has_many :ratings, through: :consultations
   def patients_with_consultations
     patients
   end
@@ -59,6 +59,7 @@ class Doctor < User
       0
     end
   end
+
   def display_remaining_tries
     case plan
     when "premium"
@@ -71,6 +72,7 @@ class Doctor < User
       "Pas d'essais disponibles"
     end
   end
+
   def user_image_url
     # Get the URL of the associated image
     avatar.attached? ? url_for(avatar) : nil
@@ -81,7 +83,7 @@ class Doctor < User
   end
 
   def user_image_url_mobile
-    return nil unless avatar.attached? 
+    return nil unless avatar.attached?
     image_url = Rails.application.routes.url_helpers.rails_blob_url(avatar, only_path: false)
     host = AppConfig.find_by(key: "mobile")&.value || "localhost:3000"
     image_url.gsub("localhost:3000", host)
