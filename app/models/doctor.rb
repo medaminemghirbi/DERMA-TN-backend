@@ -25,6 +25,7 @@ class Doctor < User
   has_many :phone_numbers, dependent: :destroy
   has_many :custom_mails
   has_many :ratings, through: :consultations
+
   def patients_with_consultations
     patients
   end
@@ -87,5 +88,9 @@ class Doctor < User
     image_url = Rails.application.routes.url_helpers.rails_blob_url(avatar, only_path: false)
     host = AppConfig.find_by(key: "mobile")&.value || "localhost:3000"
     image_url.gsub("localhost:3000", host)
+  end
+
+  def finished_consultations_count
+    consultations.finished.count
   end
 end

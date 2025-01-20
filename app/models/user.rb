@@ -22,9 +22,15 @@ class User < ApplicationRecord
 
   ## Associations
   has_one_attached :avatar, dependent: :destroy
+
   has_many :phone_numbers, dependent: :destroy
   has_many :sent_messages, class_name: "Message"
   has_many :received_messages, class_name: "Message"
+
+  has_many :blog_reactions
+  has_many :reacted_blogs, through: :blog_reactions, source: :blog
+
+
   def user_image_url
     # Get the URL of the associated image
     avatar.attached? ? url_for(avatar) : nil

@@ -212,7 +212,7 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def params_informations_user
-    permitted_params = params.permit(:id, :civil_status, :gender, :birthday, :lastname, :firstname, :location, :radius, :phone_number)
+    permitted_params = params.permit(:id, :civil_status, :gender, :birthday, :lastname, :firstname, :location, :radius, :phone_number, :about_me)
     permitted_params[:radius] = permitted_params[:radius].to_i if permitted_params[:radius].present?
     permitted_params
   end

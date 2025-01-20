@@ -24,7 +24,7 @@ class Api::V1::DoctorsController < ApplicationController
 
   def show
     @doctor = Doctor.find(params[:id])
-    render json: @doctor, methods: [:user_image_url, :display_remaining_tries], include: :phone_numbers
+    render json: @doctor, methods: [:user_image_url, :display_remaining_tries, :finished_consultations_count], include: :phone_numbers
   end
 
   def destroy
