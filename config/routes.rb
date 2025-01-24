@@ -1,4 +1,9 @@
 Rails.application.routes.draw do
+  devise_for :users, controllers: {
+    sessions: 'users/sessions',
+    registrations: 'users/registrations'
+  }, defaults: { format: :json }
+
   # add root par defaut for api
   root to: "static#home"
   # Mount action cable for real time (chat Or Notification)
@@ -10,12 +15,8 @@ Rails.application.routes.draw do
   delete :logout, to: "sessions#logout"
   get :logged_in, to: "sessions#logged_in"
   get "weeks/:doctor_id(/:year)", to: "weeks#index"
-  # add registration (register page ) + confirmation de l'email
-  resources :registrations, only: [:create] do
-    member do
-      get :confirm_email
-    end
-  end
+
+  
   post "predict/:doctor_id", to: "predictions#predict"
   resources :predictions
   get "download_file/:id", to: "predictions#download"

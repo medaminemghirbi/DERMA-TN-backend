@@ -60,3 +60,5 @@ gem "redis", "~> 5.3"
 gem 'redis-rails'
 gem "aws-sdk-s3", "~> 1.167", :require => false
 gem 'kaminari'
+gem 'devise'
+gem 'devise-jwt'

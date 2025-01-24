@@ -1,4 +1,8 @@
 class User < ApplicationRecord
+  # Include default devise modules. Others available are:
+  # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
+  devise :database_authenticatable, :registerable,
+         :recoverable, :rememberable, :validatable, :confirmable
   self.table_name = "users"
   enum gender: [:male, :female]
   enum civil_status: [:Mr, :Mrs, :Mme, :other]
@@ -10,12 +14,10 @@ class User < ApplicationRecord
   include Rails.application.routes.url_helpers
 
   ## Callbacks
-  before_create :confirmation_token
   before_save :generate_code_doc
   before_create :attach_avatar_based_on_gender
 
   ## Validations
-  has_secure_password
   validates :email, presence: true, uniqueness: true
   validates :lastname, presence: true
   validates :firstname, presence: true
@@ -65,14 +67,10 @@ class User < ApplicationRecord
     end
   end
 
-  def email_activate
-    self.email_confirmed = true
-    self.confirm_token = nil
-  end
-
-  def confirmation_token
-    self.confirm_token = SecureRandom.urlsafe_base64.to_s if confirm_token.blank?
-  end
+  # def email_activate
+  #   self.email_confirmed = true
+  #   self.confirm_token = nil
+  # end
 
   def send_password_reset
     generate_token(:password_reset_token)

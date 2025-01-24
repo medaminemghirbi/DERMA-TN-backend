@@ -1,15 +1,9 @@
 class CreateUsers < ActiveRecord::Migration[7.0]
   def change
     create_table :users, id: :uuid do |t|
-      t.string :email
-      t.string :password_digest
       t.string :firstname
       t.string :lastname
       t.string :address
-      t.boolean :email_confirmed, default: false
-      t.string :confirm_token
-      t.string :password_reset_token
-      t.datetime :password_reset_sent_at
       t.date :birthday
       t.integer :gender, default: 0
       t.integer :civil_status, default: 0
