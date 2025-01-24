@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_01_15_144422) do
+ActiveRecord::Schema[7.0].define(version: 2025_01_20_085740) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -48,6 +48,15 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_15_144422) do
     t.string "value"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "blog_reactions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id", null: false
+    t.uuid "blog_id", null: false
+    t.string "reaction", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "blog_id"], name: "index_blog_reactions_on_user_id_and_blog_id", unique: true
   end
 
   create_table "blogs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -171,10 +180,10 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_15_144422) do
     t.uuid "doctor_id", null: false
     t.string "predicted_class"
     t.string "probability"
+    t.integer "download_count", default: 0
     t.uuid "maladie_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "download_count", default: 0
   end
 
   create_table "ratings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -228,6 +237,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_15_144422) do
     t.string "language", default: "fr"
     t.string "confirmation_code"
     t.datetime "confirmation_code_generated_at"
+    t.string "about_me"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"

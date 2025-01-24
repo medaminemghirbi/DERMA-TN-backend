@@ -4,7 +4,7 @@ class Api::V1::BlogsController < ApplicationController
   # GET /api/v1/blogs
   def index
     blogs = Blog.order(:order).current.includes(:doctor, :maladie).as_json(
-      methods: [:image_urls],
+      methods: [:image_urls, :likes_count, :dislikes_count],
       include: {
         doctor: {
           methods: [:user_image_url]
@@ -17,7 +17,7 @@ class Api::V1::BlogsController < ApplicationController
   
   def verified_blogs
     blogs = Blog.current.verified.order(:order).current.includes(:doctor, :maladie).as_json(
-      methods: [:image_urls],
+      methods: [:image_urls, :likes_count, :dislikes_count],
       include: {
         doctor: {
           methods: [:user_image_url]
@@ -31,7 +31,7 @@ class Api::V1::BlogsController < ApplicationController
   
   def my_blogs
     blogs = Blog.where(doctor_id: params[:doctor_id]).order(:order).current.includes(:doctor, :maladie).as_json(
-      methods: [:image_urls],
+      methods: [:image_urls, :likes_count, :dislikes_count],
       include: {
         doctor: {
           methods: [:user_image_url]
@@ -44,7 +44,7 @@ class Api::V1::BlogsController < ApplicationController
   # GET /api/v1/blogs/:id
   def show
     render json: @blog.as_json(
-      methods: :image_urls,
+      methods: [:image_urls, :likes_count, :dislikes_count],
       include: {
         doctor: {
           methods: [:user_image_url]

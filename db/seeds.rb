@@ -308,4 +308,30 @@ holidays_data.each do |holiday|
   )
 end
 puts "Seeding completed! Created #{Holiday.count} holidays."
+
+########################### Seeding Language from external API ##################################
+api_url = 'https://api.languagelayer.com/languages?access_key=117336b47357b0fc9e1e85f75773d64c'
+puts "Fetching language data from API..."
+begin
+  # Fetch the data from the API
+  response = Net::HTTP.get(URI.parse(api_url))
+  data = JSON.parse(response)
+
+  if data['success']
+    # Loop through the languages and add them to the database
+    data['languages'].each do |lang|
+      Language.find_or_create_by(
+        language_code: lang['language_code'],
+        language_name: lang['language_name']
+      )
+    end
+    puts "Languages successfully added to the database."
+  else
+    puts "API response indicates failure: #{data}"
+  end
+rescue StandardError => e
+  puts "An error occurred: #{e.message}"
+end
+puts "Fetching language done"
+
 puts "Seeding done."

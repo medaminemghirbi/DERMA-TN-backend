@@ -27,7 +27,9 @@ Rails.application.routes.draw do
       end
       resources :patients
       resources :consultations
-      resources :blogs
+      resources :blogs do
+        resources :blog_reactions, only: [:create]
+      end
       resources :maladies
       resources :holidays
       resources :messages

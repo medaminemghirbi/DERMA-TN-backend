@@ -21,16 +21,20 @@ class Blog < ApplicationRecord
   has_many :reactions, dependent: :destroy
   has_many_attached :images
 
+  has_many :blog_reactions
+  has_many :reacting_users, through: :blog_reactions, source: :user
+
   def image_urls
     images.map { |image|  url_for(image) }
   end
 
-  def like_count
-    reactions.like.count
+  def likes_count
+    blog_reactions.where(reaction: 'like').count
   end
 
-  def dislike_count
-    reactions.dislike.count
+  # Returns the count of dislikes
+  def dislikes_count
+    blog_reactions.where(reaction: 'dislike').count
   end
 
 end
