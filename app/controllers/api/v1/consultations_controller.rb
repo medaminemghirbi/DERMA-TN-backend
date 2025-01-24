@@ -9,26 +9,23 @@ class Api::V1::ConsultationsController < ApplicationController
   # POST /consultations
   def create
     @consultation = Consultation.new(consultation_params)
+    validator = ConsultationValidator.new(@consultation, params)
 
-    if check_request_date?
-      render json: {error: "You cannot add a request date infeieur at today."}, status: :unprocessable_entity
-      return
+    if validator.check_request_date_invalid?
+      render json: { error: "You cannot add a request date earlier than today." }, status: :unprocessable_entity and return
     end
 
-    if holiday_exists?
-      render json: {error: "You cannot add a consultation on a holiday."}, status: :unprocessable_entity
-      return
+    if validator.holiday_exists?
+      render json: { error: "You cannot add a consultation on a holiday." }, status: :unprocessable_entity and return
     end
 
-    if consultation_with_other_doctor?
-      render json: {error: "You already created you cant create  consultation at the same time with a different doctor."}, status: :unprocessable_entity
-      return
+    if validator.consultation_with_other_doctor?
+      render json: { error: "You cannot create a consultation at the same time with a different doctor." }, status: :unprocessable_entity and return
     end
-    if consultation_exists?
-      render json: {error: "You already created a consultation request on this date."}, status: :unprocessable_entity
-      return
+    
+    if validator.consultation_exist_on_date?
+      render json: { error: "You already created a consultation request on this date." }, status: :unprocessable_entity and return
     end
-
     if @consultation.save
       handle_notifications(@consultation.patient_id, @consultation.doctor_id, @consultation)
       render json: @consultation, status: :created
@@ -199,78 +196,14 @@ class Api::V1::ConsultationsController < ApplicationController
     %w[pending rejected approved canceled].include?(status)
   end
 
-  def check_request_date?
-    request_date = Date.parse(params[:appointment]) if params[:appointment].present?
-    if request_date && request_date < Date.today
-      return true
-    end
-    false
-  end
-
-  def holiday_exists?
-    Holiday.where(holiday_date: @consultation.appointment).exists?
-  end
-
-  def consultation_exists?
-    # Check if a consultation already exists for the same patient, doctor, and appointment time
-    Consultation.where(
-      appointment: @consultation.appointment,
-      doctor_id: @consultation.doctor_id,
-      patient_id: @consultation.patient_id
-    ).where("DATE(appointment) = ?", @consultation.appointment.to_date)
-      .exists?
-  end
-
-  def consultation_with_other_doctor?
-    # Check if the same patient has another consultation at the same time with a different doctor
-    Consultation.where(
-      appointment: @consultation.appointment,
-      patient_id: @consultation.patient_id
-    ).where.not(doctor_id: @consultation.doctor_id).exists?
-  end
-
   def handle_notifications(patient_id, doctor_id, consultation)
-    @doctor = User.find(doctor_id)
-    @patient = User.find(patient_id)
-
-    if @doctor.is_emailable
-      DemandeMailer.send_mail_demande(@doctor, consultation).deliver
-    end
-    if @patient.is_emailable
-      DemandeMailer.send_mail_demande(@patient, consultation).deliver
-    end
-    if @doctor.is_notifiable
-      ActionCable.server.broadcast "ConsultationChannel", {
-        consultation: consultation,
-        status: consultation.status
-      }
-    end
-    if @patient.is_notifiable
-      ActionCable.server.broadcast "ConsultationChannel", {
-        consultation: consultation,
-        status: consultation.status
-      }
-    end
+    notification_service = NotificationService.new(consultation)
+    notification_service.send_notifications
   end
 
   def handle_sms(patient_id, doctor_id, consultation)
-    @doctor = User.find(doctor_id)
-    @patient = User.find(patient_id)
-
-    if @patient.is_smsable
-      message = "Your request with the doctor has been accepted. Check your account."
-
-      sms_sender_to_patient = Twilio::SmsSender.new(
-        body: message,
-        to_phone_number: @patient.phone_number
-      )
-
-      begin
-        sms_sender_to_patient.send_sms
-      rescue => e
-        Rails.logger.error("Error sending SMS to patient: #{e.message}")
-      end
-    end
+    notification_service = NotificationService.new(consultation)
+    notification_service.send_sms_notifications
   end
 
   TIME_SLOTS = [
