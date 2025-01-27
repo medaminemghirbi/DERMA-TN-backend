@@ -12,9 +12,10 @@ class PredictionsController < ApplicationController
     end
 
     # Save the uploaded file to a temporary location
-    image_path = Rails.root.join("tmp", image.original_filename)
+    sanitized_filename = image.original_filename.gsub(/\s+/, "_")
+    image_path = Rails.root.join("tmp", sanitized_filename)
     File.binwrite(image_path, image.read)
-
+    
     # Call the Machine Learning service with the image path
     prediction_output = RunMachineLearning.call(image_path)
 

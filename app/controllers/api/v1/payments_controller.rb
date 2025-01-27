@@ -35,4 +35,17 @@ class Api::V1::PaymentsController < ApplicationController
       render json: {error: "Failed to generate payment URL"}, status: :unprocessable_entity
     end
   end
+
+
+    
+  def generate_facture
+    consultation = Consultation.find(params[:id])
+
+    # Call the FactureService to generate the PDF
+    pdf_path = FactureService.generate(consultation)
+
+    # Send the PDF as a response
+    send_file pdf_path, type: "application/pdf", disposition: "inline", filename: "facture_#{consultation.id}.pdf"
+  end
+
 end

@@ -1,4 +1,3 @@
-# app/services/notification_service.rb
 class NotificationService
     def initialize(consultation)
       @consultation = consultation
@@ -32,12 +31,12 @@ class NotificationService
     end
   
     def send_push(user)
-      ActionCable.server.broadcast "ConsultationChannel", {
+      ActionCable.server.broadcast "ConsultationChannel_#{user.id}", {
         consultation: @consultation,
         status: @consultation.status
       }
     end
-  
+    
     def send_sms_to_patient
       message = "Your request with the doctor has been accepted. Check your account."
       sms_sender = Twilio::SmsSender.new(

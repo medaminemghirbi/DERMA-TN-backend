@@ -94,6 +94,8 @@ Rails.application.routes.draw do
 
       post "payments/generate", to: "payments#create_payment"
       get "payments/verify", to: "payments#verify_payment"
+      get "payments/:id/generate_facture", to: "payments#generate_facture"
+
       get "get_defaut_language/:user_id", to: "users#get_defaut_language"
       get "search_doctors/:query", to: "consultations#search_doctors"
     end
