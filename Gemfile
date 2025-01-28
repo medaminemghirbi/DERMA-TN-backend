@@ -60,3 +60,6 @@ gem "redis", "~> 5.3"
 gem 'redis-rails'
 gem "aws-sdk-s3", "~> 1.167", :require => false
 gem 'kaminari'
+gem 'pry', '~> 0.15.0'
+
+gem 'receipts'

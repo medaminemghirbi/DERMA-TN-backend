@@ -4,7 +4,7 @@ class Consultation < ApplicationRecord
   enum appointment_type: {onsite: 0, online: 1}
 
   scope :current, -> { where(is_archived: false) }
-  after_create_commit { broadcast_notification }
+  # after_create_commit { broadcast_notification }
 
   ## Includes
 
@@ -53,15 +53,14 @@ class Consultation < ApplicationRecord
     end
   end
 
-  def broadcast_notification
-    ActionCable.server.broadcast("ConsultationChannel", {
-      id: id,
-      appointment: appointment,
-      status: status,
-      doctor_id: doctor_id,
-      patient_id: patient_id,
-      refus_reason: refus_reason
-
-    })
-  end
+  # def broadcast_notification
+  #   ActionCable.server.broadcast("ConsultationChannel", {
+  #     id: id,
+  #     appointment: appointment,
+  #     status: status,
+  #     doctor_id: doctor_id,
+  #     patient_id: patient_id,
+  #     refus_reason: refus_reason
+  #   })
+  # end
 end
