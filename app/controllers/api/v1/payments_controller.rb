@@ -1,41 +1,57 @@
 class Api::V1::PaymentsController < ApplicationController
   def create_payment
+    
+  
     consultation = Consultation.find(params[:consultation_id])
-
-    payload = {
-      app_token: ENV["FLOUCI_APP_TOKEN"],
-      app_secret: ENV["FLOUCI_APP_SECRET"],
-      accept_card: "true",
+    data = {
+      receiverWalletId: "672de5dabe34904520699652",
+      token: "TND",
       amount: consultation.doctor.amount || 1000,
-      session_timeout_secs: 1800,
-      success_link: "http://localhost:4200/patient/appointment-request/?payment_id=#{consultation.id}",
-      fail_link: "http://localhost:4200/patient/appointment-request/fail",
-      developer_tracking_id: consultation.id.to_s
+      type: "immediate",
+      acceptedPaymentMethods: [
+        "wallet",
+        "bank_card",
+        "e-DINAR"
+      ],
+      successUrl: "http://localhost:4200/patient/appointment-request/?payment_id=#{consultation.id}",
+      failUrl: "http://localhost:4200/patient/appointment-request/fail",
+      description: "Payment for consultation ##{consultation.id}"
     }
 
-    uri = URI.parse("https://developers.flouci.com/api/generate_payment")
-    response = Net::HTTP.post(uri, payload.to_json, "Content-Type" => "application/json")
+    # Set up the URI and HTTP request
+    uri = URI.parse("https://api.preprod.konnect.network/api/v2/payments/init-payment")
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true
+
+    # Create the POST request
+    request = Net::HTTP::Post.new(uri.path) # Corrected class here
+    request["x-api-key"] = "672de5dabe3490452069964a:TlcyjP1IcbLpwviCrGmSBSGqc2zz"
+    request["Content-Type"] = "application/json"
+    request.body = data.to_json
+
+    # Send the request and parse the response
+    response = http.request(request)
     payment_data = JSON.parse(response.body)
 
-    if payment_data.dig("result", "success")
-      payment_url = payment_data["result"]["link"]
-      payment_id = payment_data["result"]["payment_id"]
-
+    if  payment_data.key?("payUrl") && payment_data.key?("paymentRef")
+      payment_url = payment_data["payUrl"]
+      payment_id = payment_data["paymentRef"]
+  
       # Create the Payment record
       Payment.create!(
         consultation: consultation,
         payment_id: payment_id,
-        amount: payload[:amount],
+        amount: data[:amount],
         status: 0 # Initial status (e.g., pending)
       )
-
+  
       # Render the URL as response
-      render json: {url: payment_url}
+      render json: { url: payment_url }
     else
-      render json: {error: "Failed to generate payment URL"}, status: :unprocessable_entity
+      render json: { error: "Failed to generate payment URL" }, status: :unprocessable_entity
     end
   end
-
+  
 
     
   def generate_facture

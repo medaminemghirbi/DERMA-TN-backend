@@ -54,6 +54,12 @@ class User < ApplicationRecord
   def confirmation_code_expired?
     confirmation_code_generated_at.nil? || (Time.current > (confirmation_code_generated_at + 5.minute))
   end
+  def send_password_reset
+    generate_token(:password_reset_token)
+    self.password_reset_sent_at = Time.zone.now
+    save!
+    UserMailer.forgot_password(self).deliver # This sends an e-mail with a link for the user to reset the password
+  end
 
   private
 
@@ -74,12 +80,6 @@ class User < ApplicationRecord
     self.confirm_token = SecureRandom.urlsafe_base64.to_s if confirm_token.blank?
   end
 
-  def send_password_reset
-    generate_token(:password_reset_token)
-    self.password_reset_sent_at = Time.zone.now
-    save!
-    UserMailer.forgot_password(self).deliver # This sends an e-mail with a link for the user to reset the password
-  end
 
   # This generates a random password reset token for the user
   def generate_token(column)

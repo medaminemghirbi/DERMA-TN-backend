@@ -7,7 +7,7 @@ class NotificationMailer < ApplicationMailer
 
     # Prepare email subject and body
     email_subject = "Your Consultation Room Link"
-    email_body = "Hello,<br>Your consultation room link is: <strong><a href='http://localhost:4200/live/#{@room_code}'>Join Consultation</a></strong><br>Best regards,<br> Doc Pro System"
+    email_body = "Hello,<br>Your consultation room link  for online consultation is: <strong><a href='http://localhost:4200/live/#{@room_code}'>Join Consultation</a></strong><br>Best regards,<br> Doc Pro System"
 
     # Send email to patient
     mail(to: @patient.email, subject: email_subject) do |format|

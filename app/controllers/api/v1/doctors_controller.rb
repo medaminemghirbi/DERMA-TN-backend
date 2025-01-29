@@ -1,18 +1,29 @@
 require "yaml"
 
 class Api::V1::DoctorsController < ApplicationController
-  before_action :authorize_request, except: [:unique_locations, :rate_doctor]
+  before_action :authorize_request, except: [:unique_locations, :rate_doctor,:index_home]
   def getDoctorStatistique
-    @consultations = Consultation.current.where(doctor_id: params[:doctor_id]).count
-    @blogs = Blog.current.where(doctor_id: params[:doctor_id]).count
-    @ia_usages = DoctorUsage.current.where(doctor_id: params[:doctor_id])
-    total_ia_usage_count = @ia_usages.sum(:count)
-    render json: {
-      consultation: @consultations,
-      blogs: @blogs,
-      ia_usage: total_ia_usage_count
-    }
+    @doctor = Doctor.find_by(id: params[:doctor_id])
+  
+    if @doctor.present?
+      # Fetch statistics
+      @consultations = Consultation.current.where(doctor_id: params[:doctor_id]).count
+      @blogs = Blog.current.where(doctor_id: params[:doctor_id]).count
+      @ia_usages = DoctorUsage.current.where(doctor_id: params[:doctor_id])
+      total_ia_usage_count = @ia_usages.sum(:count)
+  
+      # Render the doctor with additional data
+      render json: {
+        doctor: @doctor.as_json(methods: [:display_remaining_tries]),
+        consultation: @consultations,
+        blogs: @blogs,
+        ia_usage: total_ia_usage_count
+      }
+    else
+      render json: { error: 'Doctor not found' }, status: :not_found
+    end
   end
+  
 
   def index
     doctors = Doctor.current.order(:order).all
@@ -21,7 +32,22 @@ class Api::V1::DoctorsController < ApplicationController
       methods: [:user_image_url]
     )
   end
-
+  def index_home
+    doctors = Doctor.current.includes(consultations: :rating).order(:order)
+  
+    render json: doctors.as_json(
+      methods: [:user_image_url],
+      include: {
+        ratings: { only: [:id, :comment, :rating_value] }
+      }
+    ).map { |doctor| 
+      ratings = doctor["ratings"].map { |r| Rating.find(r["id"]) }
+      doctor.merge(
+        rating_count: ratings.size,
+        total_rating_value: ratings.sum(&:rating_value)
+      )
+    }
+  end
   def show
     @doctor = Doctor.find(params[:id])
     render json: @doctor, methods: [:user_image_url, :display_remaining_tries, :finished_consultations_count], include: :phone_numbers
