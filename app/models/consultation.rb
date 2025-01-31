@@ -41,8 +41,8 @@ class Consultation < ApplicationRecord
     end
   end
 
-  def within_60_minutes_before_appointment?
-    Time.current >= (appointment - 60.minutes) && Time.current < appointment
+  def within_120_minutes_before_appointment?
+    Time.current >= (appointment - 120.minutes) && Time.current < appointment
   end
 
   private

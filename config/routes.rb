@@ -22,6 +22,8 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
+      resources :password_resets
+
       resources :doctors do
         post "activate_compte", on: :member
       end
@@ -33,6 +35,9 @@ Rails.application.routes.draw do
       resources :maladies
       resources :holidays
       resources :messages
+      resources :services, only: [:index, :destroy]
+      resources :doctor_services, only: [:destroy]
+
       resources :notifications, only: [:create, :index]
       resources :phone_numbers
       resources :custom_mails
@@ -97,7 +102,11 @@ Rails.application.routes.draw do
       get "payments/:id/generate_facture", to: "payments#generate_facture"
 
       get "get_defaut_language/:user_id", to: "users#get_defaut_language"
-      get "search_doctors/:query", to: "consultations#search_doctors"
+      get "search_doctors", to: "doctors#search_doctors"
+      get "index_home", to: "doctors#index_home"
+
+      get "doctor_services/:id", to: "services#doctor_services"
+      post "doctor_add_services/:id/add_services", to: "services#doctor_add_services"
     end
   end
 

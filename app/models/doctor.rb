@@ -26,6 +26,9 @@ class Doctor < User
   has_many :custom_mails
   has_many :ratings, through: :consultations
 
+  has_many :doctor_services, dependent: :destroy
+  has_many :services, through: :doctor_services
+
   def patients_with_consultations
     patients
   end
