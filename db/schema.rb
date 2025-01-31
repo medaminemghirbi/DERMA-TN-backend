@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_01_20_085740) do
+ActiveRecord::Schema[7.0].define(version: 2025_01_31_130029) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -96,6 +96,14 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_20_085740) do
     t.datetime "sent_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "doctor_services", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "doctor_id", null: false
+    t.uuid "service_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["doctor_id", "service_id"], name: "index_doctor_services_on_doctor_and_service", unique: true
   end
 
   create_table "doctor_usages", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -190,6 +198,15 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_20_085740) do
     t.uuid "consultation_id", null: false
     t.integer "rating_value"
     t.string "comment"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "services", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name", null: false
+    t.text "description"
+    t.string "price"
+    t.integer "order", default: 1
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

@@ -1,7 +1,5 @@
 class Api::V1::PaymentsController < ApplicationController
   def create_payment
-    
-  
     consultation = Consultation.find(params[:consultation_id])
     data = {
       receiverWalletId: "672de5dabe34904520699652",
@@ -25,7 +23,7 @@ class Api::V1::PaymentsController < ApplicationController
 
     # Create the POST request
     request = Net::HTTP::Post.new(uri.path) # Corrected class here
-    request["x-api-key"] = "672de5dabe3490452069964a:TlcyjP1IcbLpwviCrGmSBSGqc2zz"
+    request["x-api-key"] = ENV["X_API_KEY"]
     request["Content-Type"] = "application/json"
     request.body = data.to_json
 
@@ -33,10 +31,10 @@ class Api::V1::PaymentsController < ApplicationController
     response = http.request(request)
     payment_data = JSON.parse(response.body)
 
-    if  payment_data.key?("payUrl") && payment_data.key?("paymentRef")
+    if payment_data.key?("payUrl") && payment_data.key?("paymentRef")
       payment_url = payment_data["payUrl"]
       payment_id = payment_data["paymentRef"]
-  
+
       # Create the Payment record
       Payment.create!(
         consultation: consultation,
@@ -44,16 +42,14 @@ class Api::V1::PaymentsController < ApplicationController
         amount: data[:amount],
         status: 0 # Initial status (e.g., pending)
       )
-  
+
       # Render the URL as response
-      render json: { url: payment_url }
+      render json: {url: payment_url}
     else
-      render json: { error: "Failed to generate payment URL" }, status: :unprocessable_entity
+      render json: {error: "Failed to generate payment URL"}, status: :unprocessable_entity
     end
   end
-  
 
-    
   def generate_facture
     consultation = Consultation.find(params[:id])
 
@@ -63,5 +59,4 @@ class Api::V1::PaymentsController < ApplicationController
     # Send the PDF as a response
     send_file pdf_path, type: "application/pdf", disposition: "inline", filename: "facture_#{consultation.id}.pdf"
   end
-
 end

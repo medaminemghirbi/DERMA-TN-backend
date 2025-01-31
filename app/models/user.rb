@@ -2,7 +2,7 @@ class User < ApplicationRecord
   self.table_name = "users"
   enum gender: [:male, :female]
   enum civil_status: [:Mr, :Mrs, :Mme, :other]
-  #encrypts :email, deterministic: true
+  # encrypts :email, deterministic: true
   # #scopes
   scope :current, -> { where(is_archived: false) }
 
@@ -30,7 +30,6 @@ class User < ApplicationRecord
   has_many :blog_reactions
   has_many :reacted_blogs, through: :blog_reactions, source: :blog
 
-
   def user_image_url
     # Get the URL of the associated image
     avatar.attached? ? url_for(avatar) : nil
@@ -42,6 +41,7 @@ class User < ApplicationRecord
     host = AppConfig.find_by(key: "mobile")&.value || "localhost:3000"
     image_url.gsub("localhost:3000", host)
   end
+
   def validate_confirmation_code(code)
     if confirmation_code == code
       update(email_confirmed: true, confirmation_code: nil, confirmation_code_generated_at: nil)
@@ -54,6 +54,7 @@ class User < ApplicationRecord
   def confirmation_code_expired?
     confirmation_code_generated_at.nil? || (Time.current > (confirmation_code_generated_at + 5.minute))
   end
+
   def send_password_reset
     generate_token(:password_reset_token)
     self.password_reset_sent_at = Time.zone.now
@@ -79,7 +80,6 @@ class User < ApplicationRecord
   def confirmation_token
     self.confirm_token = SecureRandom.urlsafe_base64.to_s if confirm_token.blank?
   end
-
 
   # This generates a random password reset token for the user
   def generate_token(column)

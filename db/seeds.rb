@@ -7,7 +7,7 @@ require "json"
 
 puts "Seeding data..."
 
-## SEEDING CONFIG FOR MOBILE API ### SET VALUE TO "" cause will be updated 
+## SEEDING CONFIG FOR MOBILE API ### SET VALUE TO "" cause will be updated
 AppConfig.create(key: "mobile", value: "")
 
 ########################### Seeding Admin ##################################
@@ -333,5 +333,21 @@ puts "Seeding completed! Created #{Holiday.count} holidays."
 #   puts "An error occurred: #{e.message}"
 # end
 # puts "Fetching language done"
+
+puts "Seeding services..."
+starting_order = 0
+
+YAML.load_file(Rails.root.join("db", "services.yml")).each do |disease_data|
+  starting_order += 1
+
+  Service.create!(
+    name: disease_data["name"],
+    description: disease_data["description"],
+    price: disease_data["price"],
+    order: starting_order
+  )
+end
+puts "Seeding services done"
+puts "Seeding Done ✅"
 
 # puts "Seeding done."

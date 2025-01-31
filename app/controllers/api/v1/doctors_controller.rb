@@ -1,17 +1,17 @@
 require "yaml"
 
 class Api::V1::DoctorsController < ApplicationController
-  before_action :authorize_request, except: [:unique_locations, :rate_doctor,:index_home]
+  before_action :authorize_request, except: [:unique_locations, :rate_doctor, :index_home, :search_doctors, :fetch_doctor_data]
   def getDoctorStatistique
     @doctor = Doctor.find_by(id: params[:doctor_id])
-  
+
     if @doctor.present?
       # Fetch statistics
       @consultations = Consultation.current.where(doctor_id: params[:doctor_id]).count
       @blogs = Blog.current.where(doctor_id: params[:doctor_id]).count
       @ia_usages = DoctorUsage.current.where(doctor_id: params[:doctor_id])
       total_ia_usage_count = @ia_usages.sum(:count)
-  
+
       # Render the doctor with additional data
       render json: {
         doctor: @doctor.as_json(methods: [:display_remaining_tries]),
@@ -20,10 +20,9 @@ class Api::V1::DoctorsController < ApplicationController
         ia_usage: total_ia_usage_count
       }
     else
-      render json: { error: 'Doctor not found' }, status: :not_found
+      render json: {error: "Doctor not found"}, status: :not_found
     end
   end
-  
 
   def index
     doctors = Doctor.current.order(:order).all
@@ -32,15 +31,16 @@ class Api::V1::DoctorsController < ApplicationController
       methods: [:user_image_url]
     )
   end
+
   def index_home
     doctors = Doctor.current.includes(consultations: :rating).order(:order)
-  
+
     render json: doctors.as_json(
       methods: [:user_image_url],
       include: {
-        ratings: { only: [:id, :comment, :rating_value] }
+        ratings: {only: [:id, :comment, :rating_value]}
       }
-    ).map { |doctor| 
+    ).map { |doctor|
       ratings = doctor["ratings"].map { |r| Rating.find(r["id"]) }
       doctor.merge(
         rating_count: ratings.size,
@@ -48,6 +48,7 @@ class Api::V1::DoctorsController < ApplicationController
       )
     }
   end
+
   def show
     @doctor = Doctor.find(params[:id])
     render json: @doctor, methods: [:user_image_url, :display_remaining_tries, :finished_consultations_count], include: :phone_numbers
@@ -190,6 +191,73 @@ class Api::V1::DoctorsController < ApplicationController
     rating_exists = Rating.exists?(consultation_id: consultation_id)
 
     render json: {ratingExists: rating_exists}
+  end
+
+  # ON USE THIS TO HANDLE MULTIPLE SEARCH ON DOCTOR FOR SAME NAME OR LOCATION
+  def search_doctors
+    query = params[:query].to_s.strip.downcase
+    location = params[:location].to_s.strip.downcase.presence # Ensure location is not empty
+    cache_key = "doctor_search/#{query}_#{location}"
+
+    doctors = Rails.cache.fetch(cache_key, expires_in: 2.minutes) do
+      scope = Doctor.includes(:ratings, :phone_numbers)
+
+      if query.present? && location.present?
+        scope = scope.where(
+          "(LOWER(firstname) LIKE :query OR LOWER(lastname) LIKE :query) AND LOWER(location) LIKE :location",
+          query: "%#{query}%",
+          location: "%#{location}%"
+        )
+      elsif query.present?
+        scope = scope.where("LOWER(firstname) LIKE :query OR LOWER(lastname) LIKE :query", query: "%#{query}%")
+      elsif location.present?
+        scope = scope.where("LOWER(location) LIKE :location", location: "%#{location}%")
+      end
+
+      scope.as_json(
+        only: [:id, :firstname, :lastname, :location, :address, :email_confirmed],
+        methods: [:user_image_url],
+        include: {
+          phone_numbers: {only: [:number]},
+          ratings: {only: [:id, :comment, :rating_value]}
+        }
+      )
+      # #TO DO  WE  WILL ADD DOCTOR SEARCH BY SERVICE
+    end
+
+    # Add rating calculations in a single loop (avoid N+1 queries)
+    doctors.each do |doctor|
+      ratings = doctor["ratings"]
+      doctor["rating_count"] = ratings.size
+      doctor["total_rating_value"] = ratings.sum { |r| r["rating_value"] }
+    end
+
+    render json: doctors
+  end
+
+  def fetch_doctor_data
+    doctor = Doctor.includes(:services, :ratings, :phone_numbers).find_by(id: params[:id])
+
+    if doctor
+      doctor_data = doctor.as_json(
+        only: [:id, :firstname, :lastname, :location, :address, :email_confirmed, :latitude, :longitude, :about_me],
+        methods: [:user_image_url],
+        include: {
+          phone_numbers: {only: [:number]},
+          ratings: {only: [:id, :comment, :rating_value]},
+          services: {only: [:id, :name, :description, :price, :duration_minutes]}  # Include services here
+        }
+      )
+
+      # Add rating calculations for the doctor
+      ratings = doctor_data["ratings"]
+      doctor_data["rating_count"] = ratings.size
+      doctor_data["total_rating_value"] = ratings.sum { |r| r["rating_value"] }
+
+      render json: doctor_data
+    else
+      render json: {error: "Doctor not found"}, status: :not_found
+    end
   end
 
   private
