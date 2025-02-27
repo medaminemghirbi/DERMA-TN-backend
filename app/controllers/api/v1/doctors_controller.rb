@@ -119,17 +119,17 @@ class Api::V1::DoctorsController < ApplicationController
     if coordinates
       @doctors = Doctor.near(coordinates, radius, units: :km)
       render json: @doctors.as_json(
-      methods: [:user_image_url],
-      include: {
-        ratings: {only: [:id, :comment, :rating_value]}
+        methods: [:user_image_url],
+        include: {
+          ratings: {only: [:id, :comment, :rating_value]}
+        }
+      ).map { |doctor|
+        ratings = doctor["ratings"].map { |r| Rating.find(r["id"]) }
+        doctor.merge(
+          rating_count: ratings.size,
+          total_rating_value: ratings.sum(&:rating_value)
+        )
       }
-    ).map { |doctor|
-      ratings = doctor["ratings"].map { |r| Rating.find(r["id"]) }
-      doctor.merge(
-        rating_count: ratings.size,
-        total_rating_value: ratings.sum(&:rating_value)
-      )
-    }
 
     else
       render json: {error: "Location not found"}, status: :unprocessable_entity
