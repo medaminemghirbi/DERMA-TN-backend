@@ -1,4 +1,4 @@
-require 'prawn'
+require "prawn"
 
 class PredictionsController < ApplicationController
   def predict
@@ -7,7 +7,7 @@ class PredictionsController < ApplicationController
     doctor = Doctor.find(params[:doctor_id])
 
     if DoctorUsage.usage_limit_reached?(doctor, doctor.limit_callback)
-      render json: { error: "Limit reached for using AI. Please upgrade your plan." }, status: 403
+      render json: {error: "Limit reached for using AI. Please upgrade your plan."}, status: 403
       return
     end
 
@@ -15,13 +15,13 @@ class PredictionsController < ApplicationController
     sanitized_filename = image.original_filename.gsub(/\s+/, "_")
     image_path = Rails.root.join("tmp", sanitized_filename)
     File.binwrite(image_path, image.read)
-    
+
     # Call the Machine Learning service with the image path
     prediction_output = RunMachineLearning.call(image_path)
 
     # Ensure the output is not nil or empty
     if prediction_output.nil? || prediction_output.empty?
-      render json: { error: "Failed to get a valid prediction from the model" }, status: 500
+      render json: {error: "Failed to get a valid prediction from the model"}, status: 500
       return
     end
 
@@ -32,14 +32,13 @@ class PredictionsController < ApplicationController
     lines = prediction_output.split("\n")
 
     if lines.size < 2
-      render json: { error: "Prediction format is incorrect" }, status: 500
+      render json: {error: "Prediction format is incorrect"}, status: 500
       return
     end
 
     # Parse predicted class and probability
     predicted_class = lines[0]&.gsub("Predicted class: ", "") || "Unknown"
     probability = lines[1]&.gsub("Probability: ", "").to_f || 0
-
 
     maladie = Maladie.find_by(maladie_name: predicted_class)
 
@@ -63,21 +62,21 @@ class PredictionsController < ApplicationController
     )
 
     if prediction.save
-      render json: { predicted_class: predicted_class, maladie: maladie, probability: probability, report_url: url_for(prediction.report_pdf) }
+      render json: {predicted_class: predicted_class, maladie: maladie, probability: probability, report_url: url_for(prediction.report_pdf)}
     else
-      render json: { error: "Failed to save prediction and report" }, status: 500
+      render json: {error: "Failed to save prediction and report"}, status: 500
     end
   end
 
   def download
     doc = Prediction.find(params[:id])
-  
+
     if doc.report_pdf.attached?
       begin
         pdf_data = doc.report_pdf.download # Download the file content
-        send_data pdf_data, filename: "#{doc.predicted_class}.pdf", type: doc.report_pdf.content_type, disposition: 'attachment'
+        send_data pdf_data, filename: "#{doc.predicted_class}.pdf", type: doc.report_pdf.content_type, disposition: "attachment"
         doc.update!(download_count: doc.download_count + 1)
-        response.headers['X-Download-Count'] = doc.download_count.to_s 
+        response.headers["X-Download-Count"] = doc.download_count.to_s
       rescue ActiveStorage::BlobError => e # Catch specific ActiveStorage errors
         puts "ActiveStorage Blob Error: #{e.message}"
         render plain: "Error accessing file.", status: :internal_server_error # More informative error
@@ -98,12 +97,15 @@ class PredictionsController < ApplicationController
     render json: predictions.map { |doc| prediction_data(doc) }, status: :ok, methods: [:prediction_url]
   end
 
-
-
-
+  def sent_report
+    patient = Patient.find(params[:patient_id])
+    prediction = Prediction.find(params[:prediction_id])
+    report_pdf_url = prediction.prediction_url
+    ReportMailer.sent_email_to(patient, report_pdf_url).deliver
+    prediction.update(sent_at: Time.now)
+  end
 
   private
-
 
   # Method to format document data including file_type and document_url
   def prediction_data(doc)
@@ -112,17 +114,16 @@ class PredictionsController < ApplicationController
       title: "#{doc.probability.to_i}% #{doc.predicted_class}.pdf ",
       created_at: doc.created_at,
       updated_at: doc.updated_at,
-      createur: "Dr."+ " "+doc.doctor.firstname + " " + doc.doctor.lastname,
+      createur: "Dr." + " " + doc.doctor.firstname + " " + doc.doctor.lastname,
 
       download_count: doc.download_count,
 
       file_type: doc.report_pdf.attached? ? doc.report_pdf.content_type : nil,  # Include file type
       size: doc.report_pdf.attached? ? (doc.report_pdf.blob.byte_size.to_f / 1_024).round(2) : 0,  # Convert size to KB
-
+      sent_at: doc.sent_at,
       prediction_url: doc.report_pdf.attached? ? url_for(doc.report_pdf) : nil    # Include document URL
     }
   end
-
 
   def generate_pdf(predicted_class, probability, maladie, image_path)
     Prawn::Document.new do |pdf|
@@ -130,25 +131,23 @@ class PredictionsController < ApplicationController
       pdf.text "© DocPro Medical App", size: 10, align: :right
       pdf.text "Medical Prediction Report", size: 24, style: :bold, align: :center
       pdf.move_down 3
-      pdf.text "Generated on: #{Time.now.strftime('%d-%m-%Y %H:%M:%S')}", size: 10, align: :right
+      pdf.text "Generated on: #{Time.now.strftime("%d-%m-%Y %H:%M:%S")}", size: 10, align: :right
       pdf.stroke_horizontal_rule
 
-
       pdf.move_down 20
-  
+
       # Prediction Details
       pdf.text "Prediction Details", size: 18, style: :bold
       pdf.move_down 10
       pdf.move_down 10
       pdf.text "Predicted Disease: #{predicted_class}", size: 14, style: :bold
-      pdf.text "Probability: #{(probability ).round(2)}%", size: 14, style: :italic if probability.is_a?(Numeric)
+      pdf.text "Probability: #{probability.round(2)}%", size: 14, style: :italic if probability.is_a?(Numeric)
       pdf.text "Scanned Image: ", size: 14, style: :italic
       scanned_image = image_path
       pdf.image scanned_image, width: 250, height: 125, position: :left
 
       pdf.move_down 20
-  
-  
+
       # Disease Information
       if maladie
         disease_image = maladie.image.attached? ? ActiveStorage::Blob.service.send(:path_for, maladie.image.key) : nil
@@ -168,13 +167,12 @@ class PredictionsController < ApplicationController
         pdf.image disease_image, width: 250, height: 125, position: :center
 
       end
-  
+
       # Footer
       pdf.move_down 20
       pdf.stroke_horizontal_rule
       pdf.move_down 10
-      pdf.image 'app/assets/images/logo_with_beta.png', at: [pdf.bounds.right - 160, pdf.cursor], width: 150, height: 70
+      pdf.image "app/assets/images/logo_with_beta.png", at: [pdf.bounds.right - 160, pdf.cursor], width: 150, height: 70
     end.render
   end
-  
 end

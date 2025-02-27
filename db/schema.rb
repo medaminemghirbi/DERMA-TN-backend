@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_01_31_130029) do
+ActiveRecord::Schema[7.0].define(version: 2025_01_31_093718) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -154,16 +154,6 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_31_130029) do
     t.uuid "sender_id"
   end
 
-  create_table "notifications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.uuid "consultation_id"
-    t.string "status"
-    t.datetime "received_at"
-    t.integer "order", default: 1
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["consultation_id"], name: "index_notifications_on_consultation_id"
-  end
-
   create_table "payments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "consultation_id", null: false
     t.string "payment_id"
@@ -190,6 +180,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_31_130029) do
     t.string "probability"
     t.integer "download_count", default: 0
     t.uuid "maladie_id", null: false
+    t.datetime "sent_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

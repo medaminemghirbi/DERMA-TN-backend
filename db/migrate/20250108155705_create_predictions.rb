@@ -6,6 +6,7 @@ class CreatePredictions < ActiveRecord::Migration[7.0]
       t.string :probability
       t.integer :download_count, default: 0
       t.uuid :maladie_id, null: false
+      t.datetime :sent_at
       t.timestamps
     end
   end
