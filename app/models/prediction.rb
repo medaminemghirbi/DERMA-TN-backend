@@ -1,4 +1,6 @@
 class Prediction < ApplicationRecord
+  include Rails.application.routes.url_helpers
+
   belongs_to :doctor, class_name: 'User'
   belongs_to :maladie
   has_one_attached :report_pdf

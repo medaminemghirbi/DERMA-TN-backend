@@ -17,6 +17,8 @@ Rails.application.routes.draw do
     end
   end
   post "predict/:doctor_id", to: "predictions#predict"
+  post "sent_report/:patient_id/:prediction_id", to: "predictions#sent_report"
+
   resources :predictions
   get "download_file/:id", to: "predictions#download"
 

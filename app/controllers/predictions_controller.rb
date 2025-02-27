@@ -100,8 +100,14 @@ class PredictionsController < ApplicationController
 
 
 
-
-
+  def sent_report
+    patient = Patient.find(params[:patient_id])
+    prediction = Prediction.find(params[:prediction_id])
+    report_pdf_url = prediction.prediction_url
+    ReportMailer.sent_email_to(patient, report_pdf_url).deliver
+    prediction.update(sent_at: Time.now)
+    end
+  
   private
 
 
@@ -118,7 +124,7 @@ class PredictionsController < ApplicationController
 
       file_type: doc.report_pdf.attached? ? doc.report_pdf.content_type : nil,  # Include file type
       size: doc.report_pdf.attached? ? (doc.report_pdf.blob.byte_size.to_f / 1_024).round(2) : 0,  # Convert size to KB
-
+      sent_at: doc.sent_at,
       prediction_url: doc.report_pdf.attached? ? url_for(doc.report_pdf) : nil    # Include document URL
     }
   end
