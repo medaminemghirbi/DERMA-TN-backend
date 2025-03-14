@@ -1,4 +1,10 @@
 class User < ApplicationRecord
+  
+  # Include default devise modules. Others available are:
+  # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
+  devise :database_authenticatable, :registerable,
+         :recoverable, :rememberable, :validatable, :confirmable,
+         :jwt_authenticatable, jwt_revocation_strategy: Devise::JWT::RevocationStrategies::JTIMatcher
   self.table_name = "users"
   enum gender: [:male, :female]
   enum civil_status: [:Mr, :Mrs, :Mme, :other]
@@ -8,14 +14,12 @@ class User < ApplicationRecord
 
   # #Includes
   include Rails.application.routes.url_helpers
-
+  include Devise::JWT::RevocationStrategies::JTIMatcher
   ## Callbacks
-  before_create :confirmation_token
   before_save :generate_code_doc
   before_create :attach_avatar_based_on_gender
-
+  before_create :set_jti
   ## Validations
-  has_secure_password
   validates :email, presence: true, uniqueness: true
   validates :lastname, presence: true
   validates :firstname, presence: true
@@ -64,6 +68,10 @@ class User < ApplicationRecord
 
   private
 
+  def set_jti
+    self.jti ||= SecureRandom.uuid
+  end
+
   def attach_avatar_based_on_gender
     if male?
       avatar.attach(io: File.open(Rails.root.join("app", "assets", "images", "default_avatar.png")), filename: "default_avatar.png", content_type: "image/png")
@@ -72,14 +80,7 @@ class User < ApplicationRecord
     end
   end
 
-  def email_activate
-    self.email_confirmed = true
-    self.confirm_token = nil
-  end
 
-  def confirmation_token
-    self.confirm_token = SecureRandom.urlsafe_base64.to_s if confirm_token.blank?
-  end
 
   # This generates a random password reset token for the user
   def generate_token(column)

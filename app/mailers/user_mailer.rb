@@ -5,6 +5,14 @@ class UserMailer < ApplicationMailer
     mail(to: " <#{user.email}>", subject: "Registration Confirmation")
   end
 
+  def confirmation_instructions(record, token, opts = {})
+    @user = record
+    @token = token
+    opts[:subject] ||= "Confirm Your Account"
+    Rails.application.routes.default_url_options[:host] = 'localhost:4200'
+    mail(to: @user.email, subject: opts[:subject])
+  end
+
   def forgot_password(user)
     @user = user
     @greeting = "Hi"

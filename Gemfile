@@ -63,3 +63,5 @@ gem 'kaminari'
 gem 'pry', '~> 0.15.0'
 
 gem 'receipts'
+gem 'devise'
+gem 'devise-jwt'
