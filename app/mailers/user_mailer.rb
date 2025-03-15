@@ -1,5 +1,5 @@
 class UserMailer < ApplicationMailer
-  default from: "DocPro@System.com"
+  default from: "DermaPro@System.com"
   def registration_confirmation(user)
     @user = user
     mail(to: " <#{user.email}>", subject: "Registration Confirmation")
