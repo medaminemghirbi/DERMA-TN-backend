@@ -60,8 +60,8 @@ class User < ApplicationRecord
   end
 
   def send_password_reset
-    generate_token(:password_reset_token)
-    self.password_reset_sent_at = Time.zone.now
+    generate_token(:reset_password_token)
+    self.reset_password_sent_at = Time.zone.now
     save!
     UserMailer.forgot_password(self).deliver # This sends an e-mail with a link for the user to reset the password
   end

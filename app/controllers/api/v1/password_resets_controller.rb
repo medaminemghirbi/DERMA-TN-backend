@@ -11,10 +11,10 @@ class Api::V1::PasswordResetsController < ApplicationController
       end
     end
     def edit
-        @user = User.find_by_password_reset_token!(params[:id])
+        @user = User.find_by_reset_password_token!(params[:id])
     end
     def update
-        @user = User.find_by_password_reset_token!(params[:id])
+        @user = User.find_by_reset_password_token!(params[:id])
         if @user.update(user_params)
           render json: "password link has been updated"
         else
