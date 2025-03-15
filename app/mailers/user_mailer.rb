@@ -1,8 +1,15 @@
 class UserMailer < ApplicationMailer
-  default from: "DocPro@System.com"
+  default from: "DermaPro@System.com"
   def registration_confirmation(user)
     @user = user
     mail(to: " <#{user.email}>", subject: "Registration Confirmation")
+  end
+
+  def confirmation_instructions(record, token, opts = {})
+    @user = record
+    @token = token
+    opts[:subject] ||= "Confirm Your Account"
+    mail(to: @user.email, subject: opts[:subject])
   end
 
   def forgot_password(user)

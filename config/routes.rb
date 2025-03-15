@@ -1,4 +1,11 @@
 Rails.application.routes.draw do
+  devise_for :users, path: 'api', path_names: { registration: 'sign_up', sessions: 'sign_in' }, controllers: {
+    sessions: 'users/sessions',
+    registrations: 'users/registrations',
+    passwords: 'users/passwords',
+    confirmations: 'users/confirmations'
+  }
+  
   # add root par defaut for api
   root to: "static#home"
   # Mount action cable for real time (chat Or Notification)
