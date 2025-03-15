@@ -23,7 +23,7 @@ if response.is_a?(Net::HTTPSuccess)
     lastname: "Admin",
     password: "123456",
     password_confirmation: "123456",
-    email_confirmed: true
+    confirmed_at: Time.now
   )
 
   admin.avatar.attach(
@@ -49,7 +49,7 @@ CSV.foreach(csv_file_path, headers: true).first(6).each_with_index do |row, inde
     order: starting_order + index,
     password: "123456",
     password_confirmation: "123456",
-    email_confirmed: true
+    confirmed_at: Time.now
   )
 
   3.times do
@@ -91,7 +91,8 @@ starting_order = 1
     password_confirmation: "123456",
     phone_number: phone_number,
     location: ["sousse", "ben-arous", "bizerte", "beja", "gabes", "gafsa", "ariana", "hammamet", "monastir"].sample,
-    email_confirmed: true
+    confirmed_at: Time.now
+
   )
 
   # Use Faker to get the avatar image URL

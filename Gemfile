@@ -11,7 +11,7 @@ gem "pg", "~> 1.4.3"
 gem 'jwt'
 
 gem 'dotenv-rails', groups: [:development, :test]
-
+gem 'active_model_serializers'
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", "~> 5.0"
 gem 'byebug', '~> 11.1', '>= 11.1.3'

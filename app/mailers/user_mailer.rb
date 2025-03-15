@@ -9,7 +9,6 @@ class UserMailer < ApplicationMailer
     @user = record
     @token = token
     opts[:subject] ||= "Confirm Your Account"
-    Rails.application.routes.default_url_options[:host] = 'localhost:4200'
     mail(to: @user.email, subject: opts[:subject])
   end
 

@@ -7,13 +7,22 @@ class Users::SessionsController < Devise::SessionsController
 
   def respond_with(resource, _opts = {})
     if resource.persisted?
-      # Generate JWT token
       token = JsonWebToken.encode(user_id: resource.id)
-      render json: { user: resource, token: token, message: 'Logged in successfully.' }, status: :ok
+      time = Time.now + 24.hours.to_i
+      Rails.cache.write("blacklist/#{token}", true, expires_in: time.to_i - Time.now.to_i)
+
+      render json: {
+        logged_in: true,
+        user: UserSerializer.new(resource),
+        type: resource.type,
+        token: token,
+        exp: time.strftime("%m-%d-%Y %H:%M")
+      }
     else
-      render json: { message: 'Login failed', errors: resource.errors.full_messages }, status: :unprocessable_entity
+      render json: { status:401 ,message: 'Login failed', errors: resource.errors.full_messages }, status: :unprocessable_entity
     end
   end
+
 
   def respond_to_on_destroy
     if current_user

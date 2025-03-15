@@ -12,7 +12,6 @@ class Blog < ApplicationRecord
   validates :title, presence: true
   validates :content, presence: true
   validates :images, presence: true, if: -> { images.attached? }
-  after_create_commit :notify_users
 
   ## Associations
   has_many :messages, dependent: :destroy
