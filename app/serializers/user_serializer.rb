@@ -7,9 +7,13 @@ class UserSerializer < ActiveModel::Serializer
              :is_smsable, :working_saturday, :working_on_line, :amount, 
              :created_at, :updated_at, :language, :confirmation_code, 
              :confirmed_at,
-             :confirmation_code_generated_at, :about_me, :jti, :user_image_url
+             :confirmation_code_generated_at, :about_me, :jti, :user_image_url, :user_image_url_mobile
 
   def user_image_url
     object.user_image_url
+  end
+
+  def user_image_url_mobile
+    object.user_image_url_mobile
   end
 end

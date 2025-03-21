@@ -1,6 +1,13 @@
 namespace :server do
   desc "Run Rails server on two ports"
   task :multi => :environment do
+    puts "Starting PostgreSQL Service....."
+
+    system("sudo systemctl stop postgresql")
+
+    system("sudo systemctl start postgresql")
+    puts "PostgreSQL Live ✅ ."
+
     client_ip = Socket.ip_address_list
                      .select { |addr| addr.ipv4_private? && !addr.ip_address.start_with?("172.") }
                      .first&.ip_address

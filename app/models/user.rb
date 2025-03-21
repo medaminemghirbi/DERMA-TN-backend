@@ -20,9 +20,7 @@ class User < ApplicationRecord
   before_create :attach_avatar_based_on_gender
   before_create :set_jti
   ## Validations
-  validates :email, presence: true, uniqueness: true
-  validates :lastname, presence: true
-  validates :firstname, presence: true
+  validates :email, uniqueness: true
 
   ## Associations
   has_one_attached :avatar, dependent: :destroy
@@ -48,7 +46,7 @@ class User < ApplicationRecord
 
   def validate_confirmation_code(code)
     if confirmation_code == code
-      update(email_confirmed: true, confirmation_code: nil, confirmation_code_generated_at: nil)
+      update(confirmed_at: Time.now, confirmation_code: nil, confirmation_code_generated_at: nil)
       true
     else
       false
@@ -91,6 +89,7 @@ class User < ApplicationRecord
   end
 
   def generate_code_doc
+    return unless type == "Doctor"
     current_year = Time.now.year
     # Get the first two characters of the first and last name
     first_two_firstname = firstname[0, 2].capitalize

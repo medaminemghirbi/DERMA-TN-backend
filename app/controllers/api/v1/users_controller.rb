@@ -154,7 +154,7 @@ class Api::V1::UsersController < ApplicationController
   def update_phone_number
     @user = User.find(params[:id])
     if @user.update(phone_number: params[:phone_number])
-      render json: @user, methods: [:user_image_url]
+      render json: @user, status: :ok, methods: [:user_image_url]
     else
       render json: {
         status: 422,
