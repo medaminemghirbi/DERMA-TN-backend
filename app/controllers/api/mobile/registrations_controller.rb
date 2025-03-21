@@ -29,12 +29,15 @@ class Api::Mobile::RegistrationsController < ApplicationController
     else Patient
     end
     user = user_class.new(user_params)
+    #REMOVE THIS IN PFE CAUSE IF WE WILL USE THE method if TWILIO NO NEED IT'S EXISIT IN OTP VERIFICATION
     user.confirmation_code = generate_confirmation_code
     user.confirmation_code_generated_at = Time.current
 
     if user.save
       UserMailer.confirmation_email(user).deliver
-      session[:user_id] = user.id
+      #WE DISABLE THIS CODE CAUSE IT COST MONEY I IWLL REOPEN IT IN PFE TO TEST ACCOUNT CONFIRMATION WITH PHONE NUMBER
+      # phone_verification = PhoneVerificationService.new(user)
+      # phone_verification.send_otp_to_patient
       render json: {status: 200, user: user,
                     message: "Account created successfully.",
                     type: user.class.name}
@@ -46,7 +49,7 @@ class Api::Mobile::RegistrationsController < ApplicationController
   private
 
   def user_params
-    params.require(:registration).permit(:lastname, :firstname, :email, :password, :password_confirmation, :type, :location)
+    params.require(:registration).permit(:lastname, :firstname, :email, :password, :password_confirmation, :type, :location, :phone_number)
   end
 
   def generate_confirmation_code

@@ -3,8 +3,8 @@ module Twilio
     TWILIO_ACCOUNT_SID = ENV['TWILIO_ACCOUNT_SID']
     TWILIO_AUTH_TOKEN = ENV['TWILIO_AUTH_TOKEN']
     TWILIO_MESSAGING_SERVICE_SID = ENV['TWILIO_MESSAGING_SERVICE_SID']
+    TWILIO_FROM_PHONE = ENV['TWILIO_FROM_PHONE']
     TWILIO_TEST_PHONE = ENV['TWILIO_TEST_PHONE']
-
     def initialize(body:, to_phone_number:)
       @body = body
       @to_phone_number = to_phone_number
@@ -17,7 +17,7 @@ module Twilio
       begin
         message = @client.messages.create(
           body: @body,
-          messaging_service_sid: TWILIO_MESSAGING_SERVICE_SID,
+          from: TWILIO_FROM_PHONE,
           to: to(@to_phone_number)
         )
         Rails.logger.info("Message sent successfully: #{message.sid}")
@@ -30,9 +30,15 @@ module Twilio
     private
 
     def to(to_phone_number)
-      Rails.env.development? && TWILIO_TEST_PHONE.present? ? TWILIO_TEST_PHONE : to_phone_number
-    end
+      # Use test phone number in development mode
+      return TWILIO_TEST_PHONE if Rails.env.development? && TWILIO_TEST_PHONE.present?
 
+      # Ensure the number starts with +216
+      formatted_number = to_phone_number.gsub(/\s+/, "") # Remove spaces
+      formatted_number = formatted_number.start_with?("+216") ? formatted_number : "+216#{formatted_number}"
+
+      formatted_number
+    end
     def validate_environment_variables
       missing_vars = []
       missing_vars << 'TWILIO_ACCOUNT_SID' if TWILIO_ACCOUNT_SID.blank?

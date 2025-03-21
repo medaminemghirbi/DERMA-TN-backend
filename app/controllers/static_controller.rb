@@ -28,4 +28,13 @@ class StaticController <ApplicationController
       }
     end
 
+
+    # WE DEFINE STATISTIQUE BI for ADMIN INFORMATIONS
+    def appointment_by_location
+      location = params[:location]
+      count = Consultation.joins(:patient).where(users: { location: location }).count
+      render json: { location: location, consultation_count: count }
+    end
+    
+
 end

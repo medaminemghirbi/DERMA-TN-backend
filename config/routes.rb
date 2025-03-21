@@ -8,6 +8,8 @@ Rails.application.routes.draw do
   
   # add root par defaut for api
   root to: "static#home"
+  get 'appointment_by_location/:location', to: 'static#appointment_by_location'
+
   # Mount action cable for real time (chat Or Notification)
   mount ActionCable.server => "/cable"
 
